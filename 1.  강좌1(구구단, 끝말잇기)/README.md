@@ -69,7 +69,9 @@ npx webpack</code></pre>
     // 기본적으로 lib에 내가 사용할 버전을 다 적어주는게 좋다
     "lib": ["ES5", "ES2015", "ES2016", "ES2017", "DOM"], 
     "jsx": "react", // react 사용하기 위해서
-  }
+  },
+  "exclude": ["node_modules"] // node_modules도 추가해준다.
+  //  exclude를 안해주면 tsconfig가 에러난다.
 }
 ```
 
