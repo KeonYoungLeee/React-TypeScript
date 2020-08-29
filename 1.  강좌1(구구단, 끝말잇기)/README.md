@@ -145,7 +145,7 @@ ReactDOM.render(<GuGuDan />, document.querySelector('#root'));
 >> *왜냐하면, 모듈 시스템을 이해하지 못한 증거이기 때문이다.*
 
 > `GuGuDan`에서 보면 `*`가 없다. <br>
->> 이유는, GuGuDan.tsx파일에서 ***`export default`***를 선언해주었기 때문이다. <br>
+>> 이유는, GuGuDan.tsx파일에서 ***`export default`*** 를 선언해주었기 때문이다. <br>
 
 #### GuGuDan.tsx
 ```js
