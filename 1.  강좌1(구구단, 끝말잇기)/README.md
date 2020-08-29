@@ -4,6 +4,7 @@
   - [기본 타입스크립트 세팅하기](#기본-타입스크립트-세팅하기)
   - [이벤트 헨들러, useRef 타이핑](#이벤트-헨들러,-useRef-타이핑)
   - [Class State 타이핑](#Class-State-타이핑)
+  - [useCallback 타이핑](#useCallback-타이핑)
 
 
 
@@ -310,4 +311,85 @@ class GuGuDanClass extends Component<{}, IState> { // Componet가 제네릭이�
 >> 위와 같이 설정하면 `prevState.value`의 에러는 사라진다. <br>
 
 
+
+## useCallback 타이핑
+[위로올라가기](#강좌1)
+
+<pre><code>npm i react-hot-loader</code></pre>
+
+> ***react-hot-loader*** : 저장할 때마다 새로고침을 자동으로 안되서 새로고침을 자동으로 하기위해서 설치해주었다.  <br>
+>> **webpack-dev-server**도 설정해줘야한다. <br>
+
+#### clint.tsx
+```js
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { hot } from 'react-hot-loader/root'; // 추가, 객체형식으로 inpmort하였음.
+
+import Component-name from './Component-name';
+
+const Hot = hot(Component-name); // 사용할 컴포넌트를 감싸준다.
+
+ReactDOM.render(<Hot />, document.querySelector('#root'));
+```
+
+#### WordRelay.tsx
+```js
+import * as React from 'react';
+import { useState, useCallback, useRef } from 'react';
+
+const WordRelay = () => {
+
+  const [word, setWord] = useState('사과');
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const onSubmitForm = useCallback((e) => {
+    e.preventDefault();
+    const input = inputRef.current;
+    if (word[word.length - 1] === value[0]) {
+      setResult('딩동댕');
+      setWord(value);
+      setValue('');
+      if (input) {
+        input.focus();
+      }
+    } else {
+      setResult('땡');
+      setValue('');
+      if (input) {
+        input.focus();
+      }
+    }
+  }, [word, value]);
+
+  const onChange = useCallback((e) => {
+      setValue(e.currentTarget.value) 
+  }, []);
+
+  return (
+    <>
+      <div>{word}</div>
+      <form onSubmit={onSubmitForm}>
+        <input
+          ref={inputRef}
+          type="number"
+          value={value}
+          onChange={onChange}
+        />
+      </form>
+      <div>{result}</div>
+    </>
+  )
+}
+
+export default WordRelay;
+```
+> useCallback을 타입추론을 하였다. 위에 보면 2가지 방법의 타입추론 사용했다. <br>
+> `const onSubmitForm = useCallback((e) => {}` => `const onSubmitForm = useCallback<(e: React.FormEvent) => void>((e) => {}` <br>
+>> 1. useCallback에 제네릭을 사용해서 타입추론 <br>
+
+> `const onChange = useCallback((e) => {}` => `const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {}` <br>
+>> 2. `e`의 부분에다가 타입추론 (뭐든 사용하든 상관은 없는데 타입추론은 해줘야한다.) <br>
 
