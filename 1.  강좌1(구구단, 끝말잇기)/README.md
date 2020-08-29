@@ -1,6 +1,7 @@
 # 강좌1
 
   - [강좌 소개](#강좌-소개)
+  - [기본 타입스크립트 세팅하기](#기본-타입스크립트-세팅하기)
 
 
 
@@ -52,3 +53,96 @@ npx webpack</code></pre>
   }
 }
 ```
+
+## 기본 타입스크립트 세팅하기
+[위로올라가기](#강좌1)
+
+#### tsconfig.json
+```js
+{
+  "compilerOptions": {
+    "strict": true,
+    // 기본적으로 lib에 내가 사용할 버전을 다 적어주는게 좋다
+    "lib": ["ES5", "ES2015", "ES2016", "ES2017", "DOM"], 
+    "jsx": "react", // react 사용하기 위해서
+  }
+}
+```
+
+#### webpack.config.js
+```js
+// 이전에는 babel을 사용했는데 이번에는 wepback을 사용한다
+const path = require('path');
+const webpack = require('webpack');
+
+module.exports = {
+  mode: 'development', // 배포용으로할 떄에는 production으로 한다.
+  devtool: 'eval', // 배포용으로할 떄에는 hidden-source-mode으로 한다.
+  resolve: {
+    extensions: ['.jsx', '.js', '.tsx', '.ts']
+  },
+ 
+  entry: {
+    app: './clint' // clint파일이 메인페이지가 된다.
+  },
+
+  module: {
+    rules: [{
+      test: /\.tsx?$/, // awesome-typescript-loader를 통해서 옛날 문법으로 ts, tsx파일을 변환하겠다.
+      loader: 'awesome-typescript-loader' // awesome-typescript-loader는 바벨과 함께 사용 가능
+    }]
+  },
+
+  // plugins: {}, // 이거 없어졌으니 플로그인 넣지 않는다.
+  
+  output: { //module, plugins을 적용해서 최종적으로 output을 한다.
+    filename: '[name].js',
+    path: path.join(__dirname, 'dist'),
+  }
+}
+```
+> 웹팩에서는 크게 설정 4개가 있다. <br>
+>> **entry, module, plugins, output** <br>
+
+> `npx webpack` 커맨드에 실행하면 문제없이 dist파일가 생기는 것을 확인 할 수가 있다. <br>
+
+#### index.html
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>typescript-react 강좌</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="./dist/app.js"></script>
+</body>
+</html>
+```
+
+> 코딩은 clint.jsx에서 하고, 실행은 dist/app.js에서 한다. <br>
+
+#### clint.tsx
+```js
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+import GuGuDan from './GuGuDan';
+
+ReactDOM.render(<GuGuDan />, document.querySelector('#root'));
+```
+> `import React from 'react';` 이 방식으로 하면 에러가 나온다.
+>> `This module is declared with using 'export =', and can only be used with a default import when using the `***`'esModuleInterop' flag.`***
+>> 해결하기 위해서는 tsconfig.json에서 ``"esModuleInterop": true`` 하면 에러가 사라지는데 ***비추천***한다. 
+>> *왜냐하면, 모듈 시스템을 이해하지 못한 증거이기 때문이다.*
+
+> `GuGuDan`에서 보면 `*`가 없다. <br>
+>> 이유는, GuGuDan.tsx파일에서 ***`export default`***를 선언해주었기 때문이다. <br>
+
+#### GuGuDan.tsx
+```js
+export default GuGuDan;
+```
+
