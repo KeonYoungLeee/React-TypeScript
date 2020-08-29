@@ -174,8 +174,12 @@ const NumberBaseBall = () => {
 
 export default NumberBaseBall;
 ```
-> setTries에서 에러가 나온다. <br>
->> tries에 보면 `never`로 되어있다. <br>
+> `Argument of type '(t: never[]) => { try: string; result: string; }[]' is not assignable to parameter of type 'SetStateAction<never[]>'.` <br>
+> `Type '(t: never[]) => { try: string; result: string; }[]' is not assignable to type '(prevState: never[]) => never[]'.` <br>
+> `Type '{ try: string; result: string; }[]' is not assignable to type 'never[]'.` <br>
+> `Type '{ try: string; result: string; }' is not assignable to type 'never'.ts(2345)` <br>
+> 위에 보면 setTries에 해당하는 에러가 나온다. <br>
+>> 또한, useState의 tries를 자세히 보면 ***`never[]`***로 되어있다. <br>
 >> 즉, ***useState에서 빈 배열을 사용할 경우에는 타이핑 문제를 일으킨다.*** <br>
 
 #### NumberBaseBall.tsx (setTries 에러해결 - 정확한 타이핑)
