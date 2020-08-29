@@ -1,16 +1,3 @@
-# 강좌2
-
-  - [숫자야구 타이핑](#숫자야구-타이핑)
-
-
-
-
-
-## 숫자야구 타이핑
-[위로올라가기](#강좌2)
-
-#### NumberBaseBall.tsx
-```js
 import * as React from 'react';
 import { useRef, useState, useCallback } from 'react';
 
@@ -118,4 +105,3 @@ const NumberBaseBall = () => {
 }
 
 export default NumberBaseBall;
-```
