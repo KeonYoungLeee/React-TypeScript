@@ -2,6 +2,7 @@
 
   - [강좌 소개](#강좌-소개)
   - [기본 타입스크립트 세팅하기](#기본-타입스크립트-세팅하기)
+  - [이벤트 헨들러, useRef 타이핑](#이벤트-헨들러,-useRef-타이핑)
 
 
 
@@ -146,3 +147,65 @@ ReactDOM.render(<GuGuDan />, document.querySelector('#root'));
 export default GuGuDan;
 ```
 
+
+## 이벤트 헨들러, useRef 타이핑
+[위로올라가기](#강좌1)
+
+#### GuGuDan.tsx
+```js
+import * as React from 'react';
+import { useState, useRef } from 'react';
+
+const GuGuDan = () => {
+
+  const [first, setFirst] = useState(Math.ceil(Math.random() * 9));
+  const [second, setSecond] = useState(Math.ceil(Math.random() * 9));
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState('');
+  const inputRef = useRef(null);
+
+  const onSubmitForm = (e) => { // error: Parameter 'e' implicitly has an 'any' type.ts(7006).
+    e.preventDefault();
+    const input =  inputRef.current;
+    if(parseInt(value) === first * second) {
+      setResult('정답');
+      setFirst(Math.ceil(Math.random() * 9));
+      setSecond(Math.ceil(Math.random() * 9));
+      setValue('');
+      input.focus(); // error
+    } else {
+      setResult('떙');
+      setValue('');
+      input.focus(); // error: Object is possibly 'null'.ts(2531)
+    }
+  }
+
+  return (
+    <>
+      <div>{first} 곱하기 {second}는 ?</div>
+      <form onSubmit={onSubmitForm}>
+        <input
+          ref={inputRef}
+          type="number"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      </form>
+      <div>{result}</div>
+    </>
+  );
+};
+
+export default GuGuDan;
+```
+> `const onSubmitForm = (e) => {` ➡ `const onSubmitForm = (e: React.FormEvent) => {` : 타입 추론을 해줘야한다. <br>
+
+> `input.focus();`에서 `inputRef.current;`의 current가 `inputRef`에 등록이 된다. <br>
+>> ***useRef에 제네릭을 헤서 타입추론을 사용해줘야한다.*** <br>
+>> `const inputRef = useRef(null);` ➡ `const inputRef = useRef<HTMLInputElement>(null);` : 타입추론 적용 <br>
+
+> 하지만, 에러가 사라지지는 않을 것이다. <br>
+> input은 HTML라서 null 가능성이 있기때문에, if문을 사용해서 input이 존재할 때만 사용하겠다는 의미를 보내줘야한다. <br>
+>> `input.focus();` ➡ `if (input) { input.focus(); }` <br>
+
+`npx webpack`으로 실행해준다. <br>
