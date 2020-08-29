@@ -1,0 +1,38 @@
+# 강좌1
+
+  - [강좌 소개](#강좌-소개)
+
+
+
+
+
+## 강좌 소개
+[위로올라가기](#강좌1)
+
+#### package.json
+```js
+{
+  "name": "lecture01",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack"
+  },
+  "author": "LEEKY",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^16.9.48",
+    "@types/react-dom": "^16.9.8",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "typescript": "^3.9.7"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  }
+}
+```
+
