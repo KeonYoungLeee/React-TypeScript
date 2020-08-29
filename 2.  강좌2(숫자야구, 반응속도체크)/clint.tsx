@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader/root';
 
-import NumberBaseBall from './NumberBaseBall';
+import NumberBaseBall from './BaseBallGame/NumberBaseBall';
 
 const Hot = hot(NumberBaseBall);
 

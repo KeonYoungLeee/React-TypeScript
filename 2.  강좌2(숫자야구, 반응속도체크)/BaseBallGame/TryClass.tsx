@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Component } from 'react';
-import { TryInfo } from './types';
+import { TryInfo } from '../types';
 
 class Try extends Component<{ tryInfo: TryInfo }> {
   render() {

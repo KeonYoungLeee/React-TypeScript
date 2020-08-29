@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Try from './Tryclass';
-import { TryInfo } from './types';
+import Try from './TryClass';
+import { TryInfo } from '../types';
 import { Component, createRef } from 'react';
 
 function getNumbers() { // 숫자 네 개를 겹치지 않고 랜덤하게 뽑는 함수
