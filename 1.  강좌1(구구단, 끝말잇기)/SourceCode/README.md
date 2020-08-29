@@ -3,6 +3,7 @@
   - [강좌 소개](#강좌-소개)
   - [기본 타입스크립트 세팅하기](#기본-타입스크립트-세팅하기)
   - [이벤트 헨들러, useRef 타이핑](#이벤트-헨들러,-useRef-타이핑)
+  - [Class State 타이핑](#Class-State-타이핑)
 
 
 
@@ -116,7 +117,7 @@ module.exports = {
 ## 이벤트 헨들러, useRef 타이핑
 [위로올라가기](#강좌1)
 
-#### GuGuDan.tsx
+#### GuGuDan.tsx (hooks 문법)
 ```js
 import * as React from 'react';
 import { useState, useRef } from 'react';
@@ -168,3 +169,75 @@ const GuGuDan = () => {
 export default GuGuDan;
 ```
 
+## Class State 타이핑
+[위로올라가기](#강좌1)
+
+#### GuGuDanClass.tsx (class 문법)
+```js
+import * as React from 'react';
+import { Component } from 'react';
+
+interface IState {
+  first: number,
+  second: number,
+  value: string,
+  result: string,
+}
+
+class GuGuDanClass extends Component<{}, IState> { 
+  state = {
+    first: Math.ceil(Math.random() * 9),
+    second: Math.ceil(Math.random() * 9),
+    value: '',
+    result: '',
+  }
+
+  onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (parseInt(this.state.value) === this.state.first * this.state.second) {
+      this.setState((prevState) => {
+        return {
+          result: '정답: ' + prevState.value,
+          first: Math.ceil(Math.random() * 9),
+          second: Math.ceil(Math.random() * 9),
+          value: '',
+        };
+      });
+      if ( this.input ) {
+        this.input.focus();
+      }
+    } else {
+      this.setState({
+        result: '땡',
+        value: '',
+      });
+      if ( this.input ) {
+        this.input.focus();
+      }
+    }
+  };
+
+  onChange = (e:  React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ value: e.target.value });
+  };
+
+  input: HTMLInputElement | null = null;
+
+  onRefInput = (c: HTMLInputElement) => { this.input = c; };
+
+  render() {
+    return (
+      <>
+        <div>{this.state.first} 곱하기 {this.state.second}는?</div>
+        <form onSubmit={this.onSubmit}>
+          <input ref={this.onRefInput} type="number" value={this.state.value} onChange={this.onChange}/>
+          <button>입력!</button>
+        </form>
+        <div>{this.state.result}</div>
+      </>
+    );
+  }
+}
+
+export default GuGuDanClass;
+```

@@ -3,6 +3,7 @@
   - [강좌 소개](#강좌-소개)
   - [기본 타입스크립트 세팅하기](#기본-타입스크립트-세팅하기)
   - [이벤트 헨들러, useRef 타이핑](#이벤트-헨들러,-useRef-타이핑)
+  - [Class State 타이핑](#Class-State-타이핑)
 
 
 
@@ -151,7 +152,7 @@ export default GuGuDan;
 ## 이벤트 헨들러, useRef 타이핑
 [위로올라가기](#강좌1)
 
-#### GuGuDan.tsx
+#### GuGuDan.tsx (hooks 문법) - 수정 전
 ```js
 import * as React from 'react';
 import { useState, useRef } from 'react';
@@ -209,3 +210,104 @@ export default GuGuDan;
 >> `input.focus();` ➡ `if (input) { input.focus(); }` <br>
 
 `npx webpack`으로 실행해준다. <br>
+
+## Class State 타이핑
+[위로올라가기](#강좌1)
+
+#### GuGuDanClass.tsx (class 문법) - 수정 전
+
+```js
+import * as React from 'react';
+import { Component } from 'react';
+
+class GuGuDanClass extends Component {
+  state = {
+    first: Math.ceil(Math.random() * 9),
+    second: Math.ceil(Math.random() * 9),
+    value: '',
+    result: '',
+  }
+
+  onSubmit = (e) => { // error
+    e.preventDefault();
+    if (parseInt(this.state.value) === this.state.first * this.state.second) {
+      this.setState((prevState) => {
+        return {
+          result: '정답: ' + prevState.value, // error
+          first: Math.ceil(Math.random() * 9),
+          second: Math.ceil(Math.random() * 9),
+          value: '',
+        };
+      });
+      this.input.focus();
+    } else {
+      this.setState({
+        result: '땡',
+        value: '',
+      });
+      this.input.focus();
+    }
+  };
+
+  onChange = (e) => { // error
+    this.setState({ value: e.target.value });
+  };
+
+  input; // error
+
+  onRefInput = (c) => { this.input = c; }; // error
+
+  render() {
+    return (
+      <>
+        <div>{this.state.first} 곱하기 {this.state.second}는?</div>
+        <form onSubmit={this.onSubmit}>
+          <input ref={this.onRefInput} type="number" value={this.state.value} onChange={this.onChange}/>
+          <button>입력!</button>
+        </form>
+        <div>{this.state.result}</div>
+      </>
+    );
+  }
+}
+
+export default GuGuDanClass;
+```
+
+> `onSubmit = (e) => {` ➡ `onSubmit = (e: React.FormEvent<HTMLFormElement>) => {` : 타입추론해주기 <br>
+> `onChange = (e) => {` ➡ `onChange = (e:  React.ChangeEvent<HTMLInputElement>) => {` : 타입추론해주기 <br>
+> `input;` ➡ `input: HTMLInputElement;` 을 했지만, 에러가 나온다. <br>
+>> 값이 없으니까 처음에는 null을 넣어줘야한다. 그리고 타입도 맞춰줘야 한다.(union사용) ➡ `input: HTMLInputElement | null = null;` <br>
+>> `this.input.focus();`도 에러가 나온다. `if ( this.input ) { this.input.focus(); }` 수정을 해준다. <br>
+
+> `prevState.value,` ***타입 추론 불가능*** ➡ ***interface***를 사용한다. <br>
+```js
+...생략
+
+interface IState { // 인터페이스 사용
+  first: number,
+  second: number,
+  value: string,
+  result: string,
+}
+
+class GuGuDanClass extends Component<{}, IState> { // Componet가 제네릭이다.
+  // 첫번째 인수는 props, 두번째 인수는 state이다.
+  // props는 다음 시간에 사용한다.
+  state = {
+    first: Math.ceil(Math.random() * 9),
+    second: Math.ceil(Math.random() * 9),
+    value: '',
+    result: '',
+  }
+  ...생략
+  ...생략
+}
+```
+> Component는 제네릭으로 되어있다. <br>
+> Component의 ***첫 번째 인수는 props***(아직 사용안하기 때문에 빈 객체), ***두 번쨰 인수는 props***이다. <br>
+> `Component<{}, IState>`의 **IState**는 `interface`의 **IState**이름이 같아야한다. <br>
+>> 위와 같이 설정하면 `prevState.value`의 에러는 사라진다. <br>
+
+
+
