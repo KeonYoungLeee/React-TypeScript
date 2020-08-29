@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack"
+    "dev": "webpack-dev-server --hot"
   },
   "author": "LEEKY",
   "license": "MIT",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }

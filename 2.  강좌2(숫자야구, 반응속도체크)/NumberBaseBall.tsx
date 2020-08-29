@@ -1,5 +1,7 @@
 import * as React from 'react';
+import Try from './Try';
 import { useRef, useState, useCallback } from 'react';
+import { TryInfo } from './types';
 
 const getNumbers = () => {
   const candidates = [1,2,3,4,5,6,7,8,9];
@@ -9,11 +11,6 @@ const getNumbers = () => {
     array.push(chosen);
   }
   return array;
-}
-
-interface TryInfo {
-  try: string,
-  result: string,
 }
 
 const NumberBaseBall = () => {
@@ -80,7 +77,7 @@ const NumberBaseBall = () => {
         }
       }
     }
-  }, [])
+  }, [value, answer])
 
   return (
     <>
@@ -96,9 +93,9 @@ const NumberBaseBall = () => {
       </form>
       <div>시도: {tries.length}</div>
       <ul>
-        {tries.map((v, i) => {
-          <Try key={`${i+1}차 시도 : ${v.try}`} tryInfo={v} />
-        })}
+        {tries.map((v, i) => (
+          <Try key={`${i + 1}차 시도 : ${v.try}`} tryInfo={v} />
+        ))}
       </ul>
     </>
   )
