@@ -2,6 +2,7 @@
 
   - [숫자야구 타이핑](#숫자야구-타이핑)
   - [Props 타이핑](#Props-타이핑)
+  - [setTimeout, useRef 타이핑](#setTimeout,-useRef-타이핑)
 
 
 
@@ -528,4 +529,178 @@ module.exports = {
 }
 ```
 >  webpack-dev-server를 사용할려면 publicPath를 넣어줘야한다. <br>
+
+## setTimeout, useRef 타이핑
+[위로올라가기](#강좌2)
+
+#### ResponseCheck\ResponseCheck.tsx
+```js
+import * as React from 'react';
+import { useState, useRef } from 'react';
+
+const ResponseCheck = () => {
+  const [state, setState] = useState('waiting');
+  const [message, setMessage] = useState('클릭해서 시작하세요.');
+  const [result, setResult] = useState<number[]>([]);
+  const timeout = useRef<number | null>(null);
+  const startTime = useRef(0);
+  const endTime = useRef(0);
+
+  const onClickScreen = () => {
+    if (state === 'waiting') {
+      timeout.current = setTimeout(() => {
+        setState('now');
+        setMessage('지금 클릭');
+        startTime.current = new Date().getTime();
+      }, Math.floor(Math.random() * 1000) + 2000); // 2초~3초 랜덤
+      setState('ready');
+      setMessage('초록색이 되면 클릭하세요.');
+    } else if (state === 'ready') { // 성급하게 클릭
+      clearTimeout(timeout.current!);
+      setState('waiting');
+      setMessage('너무 성급하시군요! 초록색이 된 후에 클릭하세요.');
+    } else if (state === 'now') { // 반응속도 체크
+      endTime.current = new Date().getTime();
+      setState('waiting');
+      setMessage('클릭해서 시작하세요.');
+      setResult((prevResult) => {
+        return [...prevResult, endTime.current - startTime.current];
+      });
+    }
+  };
+  const onReset = () => {
+    setResult([]);
+  };
+
+  const renderAverage = () => {
+    return result.length === 0
+      ? null
+      : <>
+        <div>평균 시간: {result.reduce((a, c) => a + c) / result.length}ms</div>
+        <button onClick={onReset}>리셋</button>
+      </>
+  };
+
+  return (
+    <>
+      <div
+        id="screen"
+        className={state}
+        onClick={onClickScreen}
+      >
+        {message}
+      </div>
+      {renderAverage()}
+    </>
+  );
+};
+
+export default ResponseCheck;
+```
+
+#### ResponseCheck\ResponseCheck.tsx(타입 추론하기)
+```js
+  // 생략
+  // 생략
+
+  // 빈 배열을 useState하는경우에는 state가 never로 되어버린다.
+  // 빈 배열은 타입을 잡힐 수 있도록 제네릭을 사용한다.
+  const [result, setResult] = useState<number[]>([]); // 타입설정 해주었다.
+  
+  const timeout = useRef<number>(null); // 수동으로 nubmer로 해서 타입설정을 해주었다. 
+
+
+  const onClickScreen = () => useCallback({
+    if (state === 'waiting') {
+      timeout.current = setTimeout(() => { // error가 나온다.
+        // 생략
+      }, Math.floor(Math.random() * 1000) + 2000);
+      // 생략
+    } else if (state === 'ready') { // 성급하게 클릭
+      // 생략
+    }
+    // 생략
+    // 생략
+  }, [state]);
+
+  // 생략
+  // 생략
+```
+> 제네릭의 역할은 타입을 제대로 안 잡혔을 때 타입을 제대로 잡아주는 역할이다. 
+
+<br><br>
+
+> `timeout.current = setTimeout(() => {}`를 보면 ➡ `Cannot assign to 'current' because it is a read-only property.ts(2540)`와 같은 에러가 나온다. <br>
+>> read-only property로 되어있다. timeout.current가 `read-only property`로 되어져있으면 timeout.current를 변경하지 못한다. (**대입불가능 - read-only의 특성**)
+>> 사실, useRef는 3가지 종류가 있다. (참고사항: useRef는 값이 바껴도 리렌더링이 되지 않는다.)<br>
+
+#### node_modules\@types\react\index.d.ts
+```js
+// 오버로딩이라고 한다.
+function useRef<T>(initialValue: T): MutableRefObject<T>; // null이 아닌경우
+function useRef<T>(initialValue: T|null): RefObject<T>; // initialValue가 null인 경우
+function useRef<T = undefined>(): MutableRefObject<T | undefined>; // undefined인 경우
+```
+> 우리의 타입스크립트 경우에는 RefObject라고 생각해서 read-only라고 생각되어지고 있다. <br>
+> 대입불가능의 원인 : RefObject에 read-only가 있음 <br>
+> 그래서, 우리는 MutableRefObject로 지정해줘야 한다. <br>
+
+### read-only property에러 해결방법 (타입스크립트 오버로딩)
+```js
+const timeout = useRef<number>(null); // 이 같은 경우가 RefObject를 가리키고 있다
+// *********************************************
+
+function useRef<T>(initialValue: T): MutableRefObject<T>; 
+// 위 부분에서 T를 서로 일치시켜줘야한다.
+
+// 일치 시켜주기 위해서는 이하와 같이 해줘야한다.
+const timeout = useRef<number | null>(null); // MutableRefObject를 가리키고 있다
+```
+> T | null을 하나의 타입이라고 생각하면 된다. <br>
+> `useRef<number | null>(initialValue: number | null): React.MutableRefObject<number | null>` ➡ useRef의 number | null과 initialValue의 number | null 부분이 일치 되어져있다. <br>
+
+
+#### timeout.current 에러해결 (형 변환)
+> 그 다음 이와같은 에러가 나온다. <br>
+> `Type 'Timeout' is not assignable to type 'number'.ts(2322)` <br>
+```js
+  // 생략
+  // 생략
+  const onClickScreen = () => useCallback({
+    if (state === 'waiting') {
+
+      // ****************************************
+      timeout.current = setTimeout(() => { // error가 나온다.
+        // 생략
+      }, Math.floor(Math.random() * 1000) + 2000) as unknwon as number; // 타입변환 해줘도 된다.
+      // 생략
+    } else if (state === 'ready') {
+      // 생략
+    }
+  }, [state]);
+
+```
+
+#### timeout.current 에러해결 (window 대입)
+> 그 다음 이와같은 에러가 나온다. <br>
+> `Type 'Timeout' is not assignable to type 'number'.ts(2322)` <br>
+```js
+  // 생략
+  // 생략
+  const onClickScreen = () => useCallback({
+    if (state === 'waiting') {
+      
+      // ****************************************
+      timeout.current = window.setTimeout(() => { // window를 대입해준다.
+
+
+        // 생략
+      }, Math.floor(Math.random() * 1000) + 2000) as unknwon as number; // 타입변환 해줘도 된다.
+      // 생략
+    } else if (state === 'ready') {
+      // 생략
+    }
+  }, [state]);
+
+```
 
