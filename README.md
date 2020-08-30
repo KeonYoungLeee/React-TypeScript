@@ -10,3 +10,9 @@
   - useCallback 타이핑
   - 끝말잇기 class 타이핑과 질문
 
+## 강좌2
+
+  - 숫자야구 타이핑
+  - Props 타이핑
+  - setTimeout, useRef 타이핑
+  - Class State에서의 주의점
