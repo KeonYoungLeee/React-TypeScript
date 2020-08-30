@@ -3,6 +3,7 @@
   - [숫자야구 타이핑](#숫자야구-타이핑)
   - [Props 타이핑](#Props-타이핑)
   - [setTimeout, useRef 타이핑](#setTimeout,-useRef-타이핑)
+  - [Class State에서의 주의점](#Class-State에서의-주의점)
 
 
 
@@ -704,3 +705,132 @@ const timeout = useRef<number | null>(null); // MutableRefObject를 가리키고
 
 ```
 
+## Class State에서의 주의점
+[위로올라가기](#강좌2)
+
+#### ResponseCheck\ResponseCheckClass.tsx  (코드 수정 전)
+```js
+import * as React from 'react';
+import { Component, createRef } from 'react';
+
+interface State {
+  state: 'waiting' | 'now' | 'ready';
+  message: string;
+  result: number[];
+}
+
+class ResponseCheckClass extends Component<{}, State> {
+  state = { // error
+    state: 'waiting',
+    message: '클릭해서 시작하세요.',
+    result: [],
+  };
+
+  timeout: number | null = null;
+  startTime: number | null = null;
+  endTime: number | null = null;
+}
+```
+
+> `result: never[];`가 never라서 state쪽에서 에러가 나온다. <br>
+>> `state` ➡ `state: State`로 바꿔준다. <br>
+
+#### ResponseCheck\ResponseCheckClass.tsx (코드 수정 후)
+```js
+import * as React from 'react';
+import { Component, createRef } from 'react';
+
+interface State {
+  state: 'waiting' | 'now' | 'ready';
+  message: string;
+  result: number[];
+}
+
+class ResponseCheckClass extends Component<{}, State> {
+  state: State = {
+    state: 'waiting',
+    message: '클릭해서 시작하세요.',
+    result: [],
+  };
+
+  timeout: number | null = null;
+  startTime: number | null = null;
+  endTime: number | null = null;
+
+  onClickScreen = () => {
+    const { state } = this.state;
+    if (state === 'waiting') {
+      this.timeout = setTimeout(() => { // ***********error***********
+        this.setState({
+          state: 'now',
+          message: '지금 클릭',
+        });
+        this.startTime = new Date().getTime();
+      }, Math.floor(Math.random() * 1000) + 2000); // 2초~3초 랜덤
+      this.setState({
+        state: 'ready',
+        message: '초록색이 되면 클릭하세요.',
+      });
+    } else if (state === 'ready') { // 성급하게 클릭
+      clearTimeout(this.timeout); // ***********error***********
+      this.setState({
+        state: 'waiting',
+        message: '너무 성급하시군요! 초록색이 된 후에 클릭하세요.',
+      });
+    } else if (state === 'now') { // 반응속도 체크
+      this.endTime = new Date().getTime();
+      this.setState((prevState) => {
+        return {
+          state: 'waiting',
+          message: '클릭해서 시작하세요.',
+          result: [...prevState.result, this.endTime - this.startTime!], // ***********error***********
+        };
+      });
+    }
+  };
+
+  onReset = () => {
+    this.setState({
+      result: [],
+    });
+  };
+
+  renderAverage = () => {
+    const {result} = this.state;
+    return result.length === 0
+      ? null
+      : <>
+        <div>평균 시간: {result.reduce((a, c) => a + c) / result.length}ms</div>
+        <button onClick={this.onReset}>리셋</button>
+      </>
+  };
+
+  render() {
+    const { state, message } = this.state;
+    return (
+      <>
+        <div
+          id="screen"
+          className={state}
+          onClick={this.onClickScreen}
+        >
+          {message}
+        </div>
+        {this.renderAverage()}
+      </>
+    )
+  }
+}
+```
+> `this.timeout = setTimeout(() => {}` ➡ `this.timeout = window.setTimeout(() => {}` <br>
+> `clearTimeout(this.timeout);` ➡ `if(this.timeout) {clearTimeout(this.timeout);}` <br>
+> `result: [...prevState.result, this.endTime - this.startTime],` ➡ `result: [...prevState.result, this.endTime! - this.startTime!],` <br>
+>> 이 부분을 if문으로 감싸주면 되는데 return해서 애매한 편이다. <br>
+>> 근데 endtime, starttime은 확실히 존재하니까 `!`를 해준다. <br>
+
+### 총 정리
+
+> 빈 배열일 때에는 never 가능성이 있어서 항상 타입붙여져야 한다. <br>
+> useRef의 오버로딩이 있는데 내가 사용할 부분을 맞춰줘야한다. <br>
+> setTimeout할 때에는 Node.js, Window인지 애매할 때에는 window붙여서 해결해주기 <br>
+> class컴포넌트일 때에는 인터페이스 적용했는데, 빈 배열있을 때 주의 점이 있다. state에 타입정의 해주면 된다. <br> 
