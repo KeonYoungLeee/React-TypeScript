@@ -3,6 +3,7 @@
   - [useCallback과 keyof typeof](#useCallback과-keyof-typeof)
   - [가위바위보 타이핑하기](#가위바위보-타이핑하기)
   - [로또 추첨기와 FC, useMemo](#로또-추첨기와-FC,-useMemo)
+  - [Class 라이프사이클 타이핑](#Class-라이프사이클-타이핑)
 
 
 
@@ -565,3 +566,154 @@ export default Ball;
 > 이번 시간에는 `useMemo`를 배웠는데, 타입 추론이 안되면 제네릭을 사용해서 타입추론 해준다. <br>
 
 
+## Class 라이프사이클 타이핑
+[위로올라가기](#강좌3)
+
+
+#### Lotto\BallClass.tsx
+```js
+import * as React from 'react';
+import { Component } from 'react'; // 여기에 Componet를 넣어준다. 
+
+
+class BallClass extends Component<{number: number}> { // <> 안에 porps를 받아온다.
+  render() {
+    const { number } = this.props;
+    let background;
+    if (number <= 10) {
+      background = 'red';
+    } else if (number <= 20) {
+      background = 'orange';
+    } else if (number <= 30) {
+      background = 'yellow';
+    } else if (number <= 40) {
+      background = 'blue';
+    } else {
+      background = 'green';
+    }
+    return (
+      <div className="ball" style={{ background }}>{number}</div>
+    );
+  };
+};
+
+export default BallClass;
+
+```
+
+#### Lotto\LottoClass.tsx
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import Ball from './Ball';
+import BallClass from './BallClass';
+
+function getWinNumbers() {
+  console.log('getWinNumbers');
+  const candidate = Array(45).fill(null).map((v, i) => i + 1);
+  const shuffle = [];
+  while (candidate.length > 0) {
+    shuffle.push(candidate.splice(Math.floor(Math.random() * candidate.length), 1)[0]);
+  }
+  const bonusNumber = shuffle[shuffle.length - 1];
+  const winNumbers = shuffle.slice(0, 6).sort((p, c) => p - c);
+  return [...winNumbers, bonusNumber];
+}
+
+interface State {
+  winNumbers: number[];
+  winBalls: number[];
+  bonus: number | null;
+  redo: boolean;
+}
+
+class LottoClass extends Component<{}, State> {
+  state: State = {
+    winNumbers: getWinNumbers(),
+    winBalls: [],
+    bonus: null,
+    redo: false,
+  };
+  timeouts: number[] = [];
+
+  runTimeouts = () => {
+    console.log('runTimeouts');
+    const { winNumbers } = this.state;
+    for (let i = 0; i < winNumbers.length - 1; i++) {
+      this.timeouts[i] = window.setTimeout(() => {
+        this.setState((prevState) => {
+          return {
+            winBalls: [...prevState.winBalls, winNumbers[i]],
+          };
+        });
+      }, (i + 1) * 1000);
+    }
+    this.timeouts[6] = window.setTimeout(() => {
+      this.setState({
+        bonus: winNumbers[6],
+        redo: true,
+      });
+    }, 7000);
+  };
+
+  componentDidMount() {
+    console.log('didMount');
+    this.runTimeouts();
+    console.log('로또 숫자를 생성합니다.');
+  }
+
+  componentDidUpdate(prevProps, prevState) { // 1) prevProps -> error, 2) prevState -> error
+    console.log('didUpdate');
+    if (this.state.winBalls.length === 0) {
+      this.runTimeouts();
+    }
+    if (prevState.winNumbers !== this.state.winNumbers) {
+      console.log('로또 숫자를 생성합니다.');
+    }
+  }
+
+  componentWillUnmount() {
+    this.timeouts.forEach((v) => {
+      clearTimeout(v);
+    });
+  }
+
+  onClickRedo = () => {
+    console.log('onClickRedo');
+    this.setState({
+      winNumbers: getWinNumbers(), // 당첨 숫자들
+      winBalls: [],
+      bonus: null, // 보너스 공
+      redo: false,
+    });
+    this.timeouts = [];
+  };
+
+  render() {
+    const { winBalls, bonus, redo } = this.state;
+    return (
+      <>
+        <div>당첨 숫자</div>
+        <div id="결과창">
+          {winBalls.map((v) => <Ball key={v} number={v} />)}
+        </div>
+        <div>보너스!</div>
+        {bonus && <Ball number={bonus} />}
+        {redo && <button onClick={this.onClickRedo}>한 번 더!</button>}
+      </>
+    );
+  }
+};
+
+export default LottoClass;
+
+```
+
+> prevProps의 에러 : `Parameter 'prevProps' implicitly has an 'any' type.ts(7006)` <br>
+>> Typing가 any가 나온다. componentDidUpdate에서 인식을 잘 하지 못한다. <br>
+>> 직접 작성해줘야한다. (타입스크립트의 한계) <br>
+
+> prevState의 에러 : `Cannot find name 'prevState'.ts(2304)` <br>
+>> prevState도 직접 작성해준다. (이것도 타입스크립트의 한계) <br>
+
+> `componentDidUpdate(prevProps, prevState) {}` ➡ `componentDidUpdate(prevProps: {}, prevState: State) {}` <br>
