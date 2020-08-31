@@ -147,7 +147,7 @@ type c = typeof rspCoords[keyof typeof rspCoords];
 
 type imgCoords = '0' | '-142px' | '-284px';
 ```
-> `type imgCoords`의 결과(`'0' | '-142px' | '-284px'`)을 순차적으로 만들 것이다. ( a -> b -> c순으로 보면서 이해하기 ) <br>
+> `type imgCoords`의 결과처럼 (`'0' | '-142px' | '-284px'`)를 만들어주기 위해서 순차적으로 타입추론을 할 것이다. ( a -> b -> c순으로 보면서 이해하기 ) <br>
 > `type a`, `type b`, `type c`형태로 타입추론이 되는 것을 확인 할 수가 있다. <br>
 > 결론적으로, `type c`랑 `imgCoords`의 결과는 같다. <br>
 >> `type c`처럼 하는편이 좋지만 못하겠으면 `imgcoords`로 해도된다. <br>
