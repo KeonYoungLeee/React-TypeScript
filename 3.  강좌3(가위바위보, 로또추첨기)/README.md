@@ -1,10 +1,217 @@
 # 강좌3
 
+  - [useCallback과 keyof typeof](#useCallback과-keyof-typeof)
   - [가위바위보 타이핑하기](#가위바위보-타이핑하기)
 
 
 
 
+
+## useCallback과 keyof typeof
+[위로올라가기](#강좌3)
+
+#### \RSP\RSP.tsx ( 변경 하기 전)
+```js
+// 좌표
+const rspCoords = {
+  바위: '0',
+  가위: '-142px',
+  보: '-284px',
+};
+
+const scores = {
+  가위: 1,
+  바위: 0,
+  보: -1,
+};
+
+// 컴퓨터 선택
+const computerChoice = (imgCoords) => {
+  return Object.keys(rspCoords).find((k) => {
+    return rspCoords[k] === imgCoords;
+  })!;
+};
+
+const RSP = () => {
+  const [result, setResult] = useState("");
+  const [imgCoord, setImgCoord] = useState(rspCoords.바위);
+  const [score, setScore] = useState(0);
+  const interval = useRef<number>();
+
+  useEffect(() => {
+    // componentDidMount, componentDidUpdate 역할(1대1 대응은 아님)
+    console.log('다시 실행');
+    interval.current = setInterval(changeHand, 100);
+    return () => {
+      // componentWillUnmount 역할
+      console.log('종료');
+      clearInterval(interval.current);
+    };
+  }, [imgCoord]);
+
+  const changeHand = () => {
+    if (imgCoord === rspCoords.바위) {
+      setImgCoord(rspCoords.가위);
+    } else if (imgCoord === rspCoords.가위) {
+      setImgCoord(rspCoords.보);
+    } else if (imgCoord === rspCoords.보) {
+      setImgCoord(rspCoords.바위);
+    }
+  };
+
+  const onClickBtn = () => () => {
+    clearInterval(interval.current);
+    const myScore = scores[choice];
+    const cpuScore = scores[computerChoice(imgCoord)];
+    const diff = myScore - cpuScore;
+    if (diff === 0) {
+      setResult('비겼습니다!');
+    } else if ([-1, 2].includes(diff)) {
+      setResult('이겼습니다!');
+      setScore((prevScore) => prevScore + 1);
+    } else {
+      setResult('졌습니다!');
+      setScore((prevScore) => prevScore - 1);
+    }
+    setTimeout(() => {
+      interval.current = setInterval(changeHand, 100);
+    }, 1000);
+  };
+
+  return (
+    <>
+      <div
+        id="computer"
+        style={{
+          background: `url(https://en.pimg.jp/023/182/267/1/23182267.jpg) ${imgCoord} 0`,
+        }}
+      />
+      <div>
+        <button id="rock" className="btn" onClick={onClickBtn("바위")}>
+          바위
+        </button>
+        <button id="scissor" className="btn" onClick={onClickBtn("가위")}>
+          가위
+        </button>
+        <button id="paper" className="btn" onClick={onClickBtn("보")}>
+          보
+        </button>
+      </div>
+      <div>{result}</div>
+      <div>현재 {score}점</div>
+    </>
+  );
+};
+
+
+export default RSP;
+```
+
+#### const로 값 변환 막아주기, 타입 추론하기
+```js
+const rspCoords = {
+  바위: '0',
+  가위: '-142px',
+  보: '-284px',
+} as const; // 이 부분은 고정이기 때문에 const 값을 고정시켜준다.
+
+const scores = {
+  가위: 1,
+  바위: 0,
+  보: -1,
+} as const; // 이 부분은 고정이기 때문에 const 값을 고정시켜준다.
+
+
+// **********************************************
+
+// type imgCoords의 형식을 순차적으로 만들 것이다. a -> b -> c
+type a = typeof rspCoords;
+// type a는 이하와 같이 표시가 된다.
+// type a = {
+//   readonly 바위: "0";
+//   readonly 가위: "-142px";
+//   readonly 보: "-284px";
+// }
+
+// **********************************************
+
+type b = keyof typeof rspCoords;
+// type b는 이하와 같이 표시가 된다.
+// type b = "바위" | "가위" | "보"
+
+// **********************************************
+
+// 우리가 원하는 것은 '0' | '-142px' | '-284px'; 이다.
+type c = typeof rspCoords[keyof typeof rspCoords];
+// type c = "0" | "-142px" | "-284px" // 결과적으로 type imgCoords랑 같다.
+
+type imgCoords = '0' | '-142px' | '-284px';
+```
+> `type imgCoords`의 결과(`'0' | '-142px' | '-284px'`)을 순차적으로 만들 것이다. ( a -> b -> c순으로 보면서 이해하기 ) <br>
+> `type a`, `type b`, `type c`형태로 타입추론이 되는 것을 확인 할 수가 있다. <br>
+> 결론적으로, `type c`랑 `imgCoords`의 결과는 같다. <br>
+>> `type c`처럼 하는편이 좋지만 못하겠으면 `imgcoords`로 해도된다. <br>
+>> 하지만, `imgCoords`는 하드코딩, 중복, 여러 번 수정이 될 수가 있기떄문에, 되도록 `type c`형태로 하는게 추천한다. <br>
+
+#### computerChoice 변경 하기 전
+```js
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
+const computerChoice = (imgCoords) => {
+  return Object.keys(rspCoords).find((k) => {
+    return rspCoords[k] === imgCoords;
+  });
+};
+```
+
+> `No index signature with a parameter of type 'string' was found on type '`<br>`{ readonly 바위: "0"; readonly 가위: "-142px"; readonly 보: "-284px"; }'.ts(7053)`
+>> Object.keys할 떄에는 keys 리턴 값이 string[]으로 되어있다. <br>
+>> Object.keys의 타입을 확인해보면, `keys(o: object): string[];`로 되어있다. <br>
+>> ***즉, string[]으로 타입정의 해줘야 한다.*** <br>
+
+#### 강제로 형변환 시켜주기 (string[]으로 형변환)
+> 바꾸기에 앞서서 `rspCoords`를 자세히보면 객체형식으로 되어있다. <br>
+>> `readonly 바위: "0";` <br>
+>> `readonly 가위: "-142px";` <br>
+>> `readonly 보: "-284px";` <br>
+```js
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
+const computerChoice = (imgCoords: ImgCoords) => {
+  return (Object.keys(rspCoords) as ["바위", "가위", "보"]).find((k) => {
+    return rspCoords[k] === imgCoords;
+  });
+};
+```
+> 객체형식을 **string[]**로 하기위해서 강제 형변환을 시켜주었다. <br>
+> as를 사용해서 `["바위", "가위", "보"]`를 넣어주었다.(**string[] 형변환**) <br>
+
+#### computerChoice의 undefined 해결 방법 1 (! 붙이기)
+```js
+
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
+const computerChoice = (imgCoords: ImgCoords) => {
+  return (Object.keys(rspCoords) as ["바위", "가위", "보"]).find((k) => {
+    return rspCoords[k] === imgCoords;
+  })!;
+};
+```
+> 여기서 또 computerChoice를 보면 <br>
+> `computerChoice`의 형태를 보면 `const computerChoice: (imgCoords: ImgCoords) => "바위" | "가위" | "보" | undefined`로 정의 되어있는 것을 확인 할 수가 있다. <br>
+> **undefined**를 없애주는기 위해서  ***`!(느낌표)`*** 를 넣어줘서 undefined가 없다는 것을 확신시켜 줄 수가 있다.. <br>
+
+
+#### computerChoice의 undefined 해결 방법 2 (예외처리 throw new Error)
+```js
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
+const computerChoice = (imgCoords: ImgCoords) => {
+  if (imgCoords === undefined) {
+    throw new Error;
+  }
+  return (Object.keys(rspCoords) as ["바위", "가위", "보"]).find((k) => {
+    return rspCoords[k] === imgCoords;
+  });
+};
+```
+> 하지만, computerChoice를 보면 undefined가 있지만, **예외처리**를 해주는 경우도 있다. <br>
 
 ## 가위바위보 타이핑하기
 [위로올라가기](#강좌3)

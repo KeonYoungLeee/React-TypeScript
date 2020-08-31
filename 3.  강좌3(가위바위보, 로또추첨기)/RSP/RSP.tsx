@@ -13,25 +13,23 @@ const scores = {
   보: -1,
 } as const;
 
+type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
 const computerChoice = (imgCoords: ImgCoords) => {
   return (Object.keys(rspCoords) as ["바위", "가위", "보"]).find((k) => {
     return rspCoords[k] === imgCoords;
   })!;
 };
 
-type ImgCoords = typeof rspCoords[keyof typeof rspCoords];
 const RSP = () => {
   const [result, setResult] = useState("");
-  const [imgCoord, setImgCoord] = useState<ImgCoords>(rspCoords.바위);
+  const [imgCoord, setImgCoord] = useState(rspCoords.바위);
   const [score, setScore] = useState(0);
   const interval = useRef<number>();
 
   useEffect(() => {
-    // componentDidMount, componentDidUpdate 역할(1대1 대응은 아님)
     console.log("다시 실행");
-    interval.current = window.setInterval(changeHand, 100);
+    interval.current = setInterval(changeHand, 100);
     return () => {
-      // componentWillUnmount 역할
       console.log("종료");
       clearInterval(interval.current);
     };
@@ -47,7 +45,7 @@ const RSP = () => {
     }
   };
 
-  const onClickBtn = (choice: keyof typeof rspCoords) => () => {
+  const onClickBtn = () => () => {
     clearInterval(interval.current);
     const myScore = scores[choice];
     const cpuScore = scores[computerChoice(imgCoord)];
@@ -62,7 +60,7 @@ const RSP = () => {
       setScore((prevScore) => prevScore - 1);
     }
     setTimeout(() => {
-      interval.current = window.setInterval(changeHand, 100);
+      interval.current = setInterval(changeHand, 100);
     }, 1000);
   };
 
