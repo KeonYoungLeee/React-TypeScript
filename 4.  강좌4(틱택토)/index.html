@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>typescript-react 강좌</title>
+</head>
+<style>
+  /* 반응속도 체크 */
+  #screen {
+    width: 300px;
+    height: 200px;
+    text-align: center;
+    user-select: none;
+  }
+  #screen.waiting {
+    background-color: aqua;
+  }
+  #screen.ready {
+    background-color: red;
+    color: white;
+  }
+  #screen.now {
+    background-color: greenyellow;
+  }
+
+  /* 가위바위보 */
+  #computer {
+    width: 142px;
+    height: 200px;
+    background-position: 0 0;
+  }
+
+  /* 로또추첨기 */
+  .ball {
+    display: inline-block;
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 20px;
+    text-align: center;
+    margin-right: 20px;
+  }
+
+  /* 틱택토 */
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    border: 1px solid black;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+  }
+
+  /* 지뢰찾기 */
+  table {
+    border-collapse: collapse;
+  }
+  td {
+    border: 1px solid black;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+  }
+</style>
+<body>
+  <div id="root"></div>
+  <script src="./dist/app.js"></script>
+</body>
+</html>
