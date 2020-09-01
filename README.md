@@ -16,3 +16,11 @@
   - Props 타이핑
   - setTimeout, useRef 타이핑
   - Class State에서의 주의점
+
+## 강좌3
+
+  - useCallback과 keyof typeof
+  - 가위바위보 타이핑하기
+  - 로또 추첨기와 FC, useMemo
+  - Class 라이프사이클 타이핑
+
