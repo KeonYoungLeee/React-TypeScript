@@ -1,6 +1,7 @@
 # 강좌4
 
   - [useReducer 타이핑](#useReducer-타이핑)
+  - [Dispatch, children](#Dispatch,-children)
 
 
 
@@ -176,7 +177,7 @@ const TicTacToe = () => {
 export default TicTacToe;
 ```
 
-#### TicTacToe.tsx(reducer 사용하기)
+#### TicTacToe.tsx(reducer 사용하기 및 props 전달하기)
 ```js
 ...생략
 ...생략
@@ -199,5 +200,176 @@ const TicTacToe = () => {
 ```
 
 > Table컴포넌트는 다음시간에 만들 것이다. <br>
+
+
+
+## Dispatch, children
+[위로올라가기](#강좌4)
+
+#### Table.tsx (props 전달하기)
+```js
+import * as React from 'react';
+import { useMemo, FunctionComponent, Dispatch } from 'react';
+
+interface Props {
+  tableData: string[][];
+  dispatch: Dispatch<any>
+  onClick: () => void;
+}
+
+const Table: FunctionComponent<Props> = ({ tableData, dispatch }) => {
+
+  // 기능은 나중에 구현, 일단 타입정의랑 props정의만 하였음
+
+  return (
+    <table>
+      {Array(tableData.length).fill(null).map((tr, i) => (
+        useMemo(
+          () => <Tr key={i} dispatch={dispatch} rowIndex={i} rowData={tableData[i]} />,
+          [tableData[i]],
+        )
+      ))}
+    </table>
+  )
+}
+
+export default Table;
+
+```
+
+#### Tr.tsx (props 전달하기)
+```js
+import * as React from 'react';
+import { Dispatch, FunctionComponent, useMemo, useRef, useEffect } from 'react';
+import Td from './Td';
+
+interface Props {
+  key: number,
+  dispatch: Dispatch<any>,
+  rowIndex: number,
+  rowData: string[],
+}
+
+const Tr: FunctionComponent<Props> = ({ key ,dispatch, rowIndex ,rowData }) => {
+  
+  // 기능은 나중에 구현, 일단 타입정의랑 props정의만 하였음
+
+  return (
+    <tr>
+      {Array(rowData.length).fill(null).map((td, i) => (
+        useMemo(
+          () => <Td key={i} dispatch={dispatch} rowIndex={rowIndex} cellIndex={i} cellData={rowData[i]}>{''}</Td>,
+          [rowData[i]],
+        )
+      ))}
+    </tr>
+  );
+};
+
+export default Tr;
+
+```
+> `{''}`(빈 배열) 이 부분은 컴포넌트와 컴포넌트 사이에 들어있는 children이다. <br>
+
+#### Td.tsx (props 전달받기)
+```js
+import * as React from 'react';
+import { useCallback, useEffect, useRef, memo, Dispatch, FunctionComponent } from 'react';
+import { CLICK_CELL } from './TicTacToe';
+
+interface Props {
+  rowIndex: number;
+  cellIndex: number;
+  dispatch: Dispatch<any>;
+  cellData: string;
+  children: string; // 위에서 사용했던(children) `{''}` 이 부분을 가져온 것이다.
+}
+
+const Td: FunctionComponent<Props> = ({ rowIndex, cellIndex, dispatch, cellData }) => {
+
+  const onClickTd = useCallback(() => {
+    console.log(rowIndex, cellIndex);
+    if (cellData) {
+      return;
+    }
+    dispatch({ type: CLICK_CELL, row: rowIndex, cell: cellIndex });
+  }, [cellData]);
+
+  return (
+    <td onClick={onClickTd}>{cellData}</td>
+  )
+};
+
+export default Td;
+```
+
+> context-api는 타입선언은 나중에 하겠다. <br>
+
+#### TicTacToe.tsx (게임 승리, 무승부 조건 만들기)
+```js
+import * as React from 'react';
+import { useEffect, useReducer, useCallback, Reducer } from 'react';
+import Table from './Table';
+
+...생략
+...생략
+
+const TicTacToe = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { tableData, turn, winner, recentCell } = state;
+
+  useEffect(() => { // 승자 가리는 effect
+    const [row, cell] = recentCell; // 가장 최근에 누른 칸
+    if (row < 0) {
+      return;
+    }
+    let win = false;
+    if (tableData[row][0] === turn && tableData[row][1] === turn && tableData[row][2] === turn) {
+      win = true;
+    }
+    if (tableData[0][cell] === turn && tableData[1][cell] === turn && tableData[2][cell] === turn) {
+      win = true;
+    }
+    if (tableData[0][0] === turn && tableData[1][1] === turn && tableData[2][2] === turn) {
+      win = true;
+    }
+    if (tableData[0][2] === turn && tableData[1][1] === turn && tableData[2][0] === turn) {
+      win = true;
+    }
+    if (win) { // 승리했을 때
+      dispatch({ type: SET_WINNER, winner: turn });
+      dispatch({ type: RESET_GAME });
+    } else { // 무승부인지 알아내기
+      let all = true; // all이 true면 무승부
+      tableData.forEach((row) => { // 무승부 검사
+        row.forEach((cell) => {
+          if (!cell) { // 빈칸이 있으면 all을 false로 한다.
+            all = false; 
+          }
+        });
+      });
+      if (all) { // all이 true라서 무승부라면
+        dispatch({ type: RESET_GAME }); // 게임 리셋
+      } else {
+        dispatch({ type: CHANGE_TURN }); // 턴을 넘기기
+      }
+
+    }
+  }, [recentCell]);
+
+  const onClickTable = useCallback(() => {
+    dispatch(setWinner('O'));
+  }, []);
+
+  return (
+    <>
+      <Table onClick={onClickTable} tableData={tableData} dispatch={dispatch} />
+      {winner && <div>{winner}님의 승리</div>}
+    </>
+  )
+};
+
+export default TicTacToe;
+```
 
 
