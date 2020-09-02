@@ -4,6 +4,8 @@
   - [Dispatch, children](#Dispatch,-children)
   - [Reducer 타이핑](#Reducer-타이핑)
   - [React JSX 부분 타이핑 및 ReactNode ReactElement 설명](#React-JSX-부분-타이핑-및-ReactNode-ReactElement-설명)
+  - [질문 (2차원 배열, tslint, tsconfig)](#질문-(2차원-배열,-tslint,-tsconfig))
+
 
 
 
@@ -578,3 +580,8 @@ export default Tr;
 
 소스 코드 없음
 
+
+## 질문 (2차원 배열, tslint, tsconfig)
+[위로올라가기](#강좌4)
+
+소스 코드 없음

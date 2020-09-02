@@ -4,6 +4,7 @@
   - [Dispatch, children](#Dispatch,-children)
   - [Reducer 타이핑](#Reducer-타이핑)
   - [React JSX 부분 타이핑 및 ReactNode ReactElement 설명](#React-JSX-부분-타이핑-및-ReactNode-ReactElement-설명)
+  - [질문 (2차원 배열, tslint, tsconfig)](#질문-(2차원-배열,-tslint,-tsconfig))
 
 
 
@@ -454,4 +455,54 @@ interface ReactElement<P = any, T extends string | JSXElementConstructor<any> = 
 > 즉, Td가 ***React.Element***라고 보면된다. <br>
 
 >> 범위 : ReactNode > ReactChild, ReactChild > ReactElement, ReactText, ReactNumber (꼭 옆에처럼 되어있는 것이 아니다. 예로들기 위한 예시이다.) <br>
+
+
+## 질문 (2차원 배열, tslint, tsconfig)
+[위로올라가기](#강좌4)
+
+
+### 2차원 배열 타입 설정
+```js
+interface xyz {
+  a: boolean,
+  z: number,
+}
+type aaa = string[]; // 1차원 배열 선언
+type bbb = Array<string>; // 1차원 배열 선언
+type CCC = Array<xyz>; // 1차원 배열 선언
+
+interface ReducerState {
+  tableDataArray1: string[][], // 2차원 배열 설정
+  tableDataArray2: aaa[], // 2차원 배열 설정
+  tableDataArray3: bbb[], // 2차원 배열 설정
+  tableDataArray3: CCC[], // 2차원 배열 설정
+}
+
+```
+> 배열의 배열을 만들면 2차원 배열이 된다. <br>
+
+
+> 이차원 배열에서, 배열 안에 object, string, number 랜덤으로 들어오는 애들의 타입설정은? <br>
+>> `type abc = (string | number | object)[];` <br>
+>> 타입이 너무 많다 싶으면 `type abc = any[]` <br>
+```js
+type abc = ( string | number | object)[]; // 1차원 배열 선언
+type xxx = any[]; // 1차원 배열 선언
+interface ReducerState {
+  tableDataArray2: aaa[], // 2차원 배열 설정
+  any2Array: xxx[], // any 2차원 배열
+}
+```
+
+### tslint에 대한 질문 (tslint를 하지말고 eslint 사용하기)
+> 원래 tslint가 있었는데 eslint랑 통합되어있어서 **eslint를 추천**한다. <br>
+> **typescript-eslint**를 하면 더 업격해진다. <br> 
+
+### tsconfig 실무에서 사용하기(예시)
+
+extendsion, 각각 프로젝트에 떄라서 다르다. <br>
+예전에 사용했던 tsconfig.json을 사용하는 경우가 많다. <br>
+
+9분10초에 참고하기. <br>
+
 
