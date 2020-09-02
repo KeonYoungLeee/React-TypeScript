@@ -1,17 +1,3 @@
-# 강좌4
-
-  - [useReducer 타이핑](#useReducer-타이핑)
-
-
-
-
-
-## useReducer 타이핑
-[위로올라가기](#강좌4)
-
-
-#### TicTacToe.tsx
-```js
 import * as React from 'react';
 import { useEffect, useReducer, useCallback, Reducer } from 'react';
 import Table from './Table';
@@ -125,5 +111,3 @@ const TicTacToe = () => {
 };
 
 export default TicTacToe;
-```
-
