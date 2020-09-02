@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useCallback, useEffect, useRef, memo, Dispatch, FunctionComponent } from 'react';
-import { clickcell } from './TicTacToe';
+import { clickCell } from './TicTacToe';
 
 interface Props {
   rowIndex: number;
@@ -18,7 +18,7 @@ const Td: FunctionComponent<Props> = ({ rowIndex, cellIndex, dispatch, cellData 
     if (cellData) {
       return;
     }
-    dispatch(clickcell(rowIndex, cellIndex));
+    dispatch(clickCell(rowIndex, cellIndex));
   }, [cellData]);
 
   return (
