@@ -1,16 +1,3 @@
-# 강좌5
-
-  - [지뢰찾기와 복습](#지뢰찾기와-복습)
-
-
-
-
-
-## 지뢰찾기와-복습
-[위로올라가기](#강좌5)
-
-#### MineSearch.tsx
-```js
 import * as React from 'react';
 import { useEffect, useReducer, useMemo, Dispatch } from 'react';
 
@@ -248,4 +235,4 @@ const reducer = (state = initalState, action: ReducerActions): ReducerState => {
       return state;
   }
 }
-```
+
