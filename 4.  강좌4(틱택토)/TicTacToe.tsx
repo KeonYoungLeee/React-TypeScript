@@ -40,7 +40,7 @@ interface ClickCellAction {
   cell: number;
 }
 
-const clickCell = (row: number, cell: number): ClickCellAction => {
+export const clickCell = (row: number, cell: number): ClickCellAction => {
   return { type: CLICK_CELL, row, cell };
 };
 
