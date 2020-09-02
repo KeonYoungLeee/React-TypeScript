@@ -2,6 +2,7 @@
 
   - [useReducer 타이핑](#useReducer-타이핑)
   - [Dispatch, children](#Dispatch,-children)
+  - [Reducer 타이핑](#Reducer-타이핑)
 
 
 
@@ -370,6 +371,53 @@ const TicTacToe = () => {
 };
 
 export default TicTacToe;
+```
+
+
+## Reducer 타이핑
+[위로올라가기](#강좌4)
+
+#### Reducer 타입추론
+```js
+// 1)
+const [state, dispatch] = useReducer(reducer, initialState);
+
+// 2) 2번은 3번이 어떻게 만들어지는 보여주기위해서 적어 놓은 것이다. 2번처럼해놓으면 에러가나서 결국에는 3번처럼 해야한다.
+const [state, dispatch] = useReducer<React.Reducer>(reducer, initialState);
+// type React.Reducer<S, A> = (prevState: S, action: A) => S 형태를 보면 이와같이 되어있다. 
+// React.Reducer에 state와 action이 있는 것을 확인 할 수가 있다.
+
+// 3)
+const [state, dispatch] = useReducer<React.Reducer<ReducerState, ReducerActions>>(reducer, initialState);
+// 4)
+const [state, dispatch] = useReducer<(state: ReducerState, action: ReducerActions) => ReducerState>(reducer, initialState);
+```
+> useReducer도 정확하게 타이핑을 할 수가 있다. <br>
+> 원래는 1번과 같이 해주는데, 타입추론이 안 될경우에는 3번처럼 해줘야한다. <br>
+> 3번과 4번은 의미가 같은 것이다. 3번은 4번을 더 축소해줄 수 있는 것을 보여주기 위한 것이다. <br>
+
+
+#### React.memo 타입추론하기
+```js
+import * as React from 'react';
+import { Dispatch, FunctionComponent, useMemo, useRef, useEffect, memo } from 'react'; // memo 추가하기
+import Td from './Td';
+
+...생략
+
+// memo 타입추론 적용하기
+const Tr: FunctionComponent<Props> = memo<React.PropsWithChildren<Props>>(({ key ,dispatch, rowIndex ,rowData }) => { 
+  
+  return (
+    <tr>
+      ...생략
+      ...생략
+    </tr>
+  );
+});
+
+export default Tr;
+
 ```
 
 

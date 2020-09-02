@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dispatch, FunctionComponent, useMemo, useRef, useEffect } from 'react';
+import { Dispatch, FunctionComponent, useMemo, useRef, useEffect, memo } from 'react';
 import Td from './Td';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
   rowData: string[],
 }
 
-const Tr: FunctionComponent<Props> = ({ key ,dispatch, rowIndex ,rowData }) => {
+const Tr: FunctionComponent<Props> = memo<React.PropsWithChildren<Props>>(({ key ,dispatch, rowIndex ,rowData }) => {
   
   return (
     <tr>
@@ -21,6 +21,6 @@ const Tr: FunctionComponent<Props> = ({ key ,dispatch, rowIndex ,rowData }) => {
       ))}
     </tr>
   );
-};
+});
 
 export default Tr;
