@@ -3,6 +3,7 @@
   - [useReducer 타이핑](#useReducer-타이핑)
   - [Dispatch, children](#Dispatch,-children)
   - [Reducer 타이핑](#Reducer-타이핑)
+  - [React JSX 부분 타이핑 및 ReactNode ReactElement 설명](#React-JSX-부분-타이핑-및-ReactNode-ReactElement-설명)
 
 
 
@@ -420,4 +421,37 @@ export default Tr;
 
 ```
 
+
+## React JSX 부분 타이핑 및 ReactNode ReactElement 설명
+[위로올라가기](#강좌4)
+
+### React.Node VS React.Element
+
+#### React.Node
+> ***`React.Node`***에 보면 *type ReactNode = ReactChild | ReactFragment | ReactPortal | boolean | null | undefined;*가 정의되어져있다.
+```js
+<div>{}</div> // {}
+```
+> `{}` 안에 `컴포넌트, 문자, 숫자, boolean, null`등이 jsx칸에 넣을 수가 있다. (**ReactFragment**는 `<></>`) <br>
+> 이런 것들을 전부 ***`React.Node`*** 라고 한다. 
+> **React.Child**에는 **ReactElement**, **ReactText(string, number)**가 있다. <br>
+> **ReactText**를 보면 string, number가 있는데, `{1}`, `{'문자열'}, <div>Text</div>`등과 같이 숫자, 문자열을 표현 할 수가 있다. <br>
+
+#### React.Element
+```js
+// ReactElement의 타입
+interface ReactElement<P = any, T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>> {
+    type: T;
+    props: P;
+    key: Key | null;
+}
+
+// ReactElement의 타입예시
+// 예로 들어서 tr.tsx에 코드소스를 보면
+<Td key={i} dispatch={dispatch} rowIndex={rowIndex} cellIndex={i} cellData={rowData[i]}>{''}</Td> 
+```
+> 위에 타입에도 type, props, key가 있는 듯이 Td에도 key, type, props가 있는 것을 확인 할 수가 있다. <br>
+> 즉, Td가 ***React.Element***라고 보면된다. <br>
+
+>> 범위 : ReactNode > ReactChild, ReactChild > ReactElement, ReactText, ReactNumber (꼭 옆에처럼 되어있는 것이 아니다. 예로들기 위한 예시이다.) <br>
 

@@ -3,6 +3,7 @@
   - [useReducer 타이핑](#useReducer-타이핑)
   - [Dispatch, children](#Dispatch,-children)
   - [Reducer 타이핑](#Reducer-타이핑)
+  - [React JSX 부분 타이핑 및 ReactNode ReactElement 설명](#React-JSX-부분-타이핑-및-ReactNode-ReactElement-설명)
 
 
 
@@ -570,4 +571,10 @@ const Tr: FunctionComponent<Props> = memo<React.PropsWithChildren<Props>>(({ key
 export default Tr;
 
 ```
+
+
+## React JSX 부분 타이핑 및 ReactNode ReactElement 설명
+[위로올라가기](#강좌4)
+
+소스 코드 없음
 
