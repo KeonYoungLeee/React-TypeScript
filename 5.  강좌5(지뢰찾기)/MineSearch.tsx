@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useReducer, useMemo, Dispatch } from 'react';
+import { useEffect, useReducer, useMemo, Dispatch, createContext } from 'react';
 
 export const CODE = {
   MINE: -7,
@@ -26,7 +26,19 @@ interface ReducerState {
   openedCount: number,
 }
 
-const initalState: ReducerState = {
+interface Context {
+  tableData: number[][],
+  halted: boolean,
+  dispatch: Dispatch<ReducerActions>,
+}
+
+export const TableContext = createContext<Context>({
+  tableData: [],
+  halted: true,
+  dispatch: () => {},
+});
+
+const initialState: ReducerState = {
   tableData: [],
   data: {
     row: 0,
@@ -160,7 +172,7 @@ export const incrementTimer = (): IncrementTimerAction => {
 };
 
 type ReducerActions = StartGameAction | OpenCellAction | ClickMineAction | FlagMineAction | QuestionCellAction | NormalizeCellAction | IncrementTimerAction;
-const reducer = (state = initalState, action: ReducerActions): ReducerState => {
+const reducer = (state = initialState, action: ReducerActions): ReducerState => {
   switch (action.type) {
     case START_GAME:
       return {
@@ -236,3 +248,32 @@ const reducer = (state = initalState, action: ReducerActions): ReducerState => {
   }
 }
 
+const MineSearch = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { tableData, halted, timer, result } = state;
+
+  const value = useMemo(() => ({ tableData, halted, dispatch }), [tableData, halted]);
+  
+  useEffect(() => {
+    let timer: number;
+    if (halted === false) {
+      timer = window.setInterval(() => {
+        dispatch({ type: INCREMENT_TIMER });
+      }, 1000);
+    }
+    return () => {
+      clearInterval(timer);
+    }
+  }, [halted]);
+
+  return (
+    <TableContext.Provider value={value}>
+      <Form />
+      <div>{timer}</div>
+      <Table />
+      <div>{result}</div>
+    </TableContext.Provider>
+);
+}
+
+export default MineSearch;

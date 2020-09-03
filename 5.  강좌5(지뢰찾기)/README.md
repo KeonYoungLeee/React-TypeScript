@@ -1,6 +1,7 @@
 # 강좌5
 
   - [지뢰찾기와 복습](#지뢰찾기와-복습)
+  - [Context API 타이핑](#Context-API-타이핑)
 
 
 
@@ -39,7 +40,7 @@ interface ReducerState {
   openedCount: number,
 }
 
-const initalState: ReducerState = {
+const initialState: ReducerState = {
   tableData: [],
   data: {
     row: 0,
@@ -190,7 +191,7 @@ type ReducerActions = StartGameAction | OpenCellAction | ClickMineAction | FlagM
 ...생략
 
 type ReducerActions = StartGameAction | OpenCellAction | ClickMineAction | FlagMineAction | QuestionCellAction | NormalizeCellAction | IncrementTimerAction;
-const reducer = (state = initalState, action: ReducerActions): ReducerState => {
+const reducer = (state = initialState, action: ReducerActions): ReducerState => {
   switch (action.type) {
     case START_GAME:
       return {
@@ -266,6 +267,99 @@ const reducer = (state = initalState, action: ReducerActions): ReducerState => {
   }
 }
 
+```
+
+
+## Context API 타이핑
+[위로올라가기](#강좌5)
+
+
+#### MineSearch.tsx(실제 컴포넌트 구현, ContextAPI 구현)
+```js
+import * as React from 'react';
+// contextAPI를 사용하기 위해서 createContext를 사용해야한다.
+import { useEffect, useReducer, useMemo, Dispatch, createContext } from 'react';
+
+...생략
+...생략
+
+interface Context {
+  tableData: number[][],
+  halted: boolean,
+  dispatch: Dispatch<ReducerActions> 
+  // 또는
+  // dispatch: Dispatch<any> // action가 많으면 any넣어도 상관은 없다. 
+}
+
+export const TableContext = createContext<Context>({ // 여기에서도 직접 타이핑을 해줘야한다.
+  tableData: [],
+  halted: true,
+  dispatch: () => {},
+});
+
+...생략
+...생략
+
+const MineSearch = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { tableData, halted, timer, result } = state;
+
+  // value는 useMemo로 사용한다.
+  // dispatch를 넣지 않는 이유는 값이 바뀌지 않기떄문에 안 넣어줬다.
+  const value = useMemo(() => ({ tableData, halted, dispatch }), [tableData, halted]);
+
+  return (
+    // ContextAPI를 사용할려면 Provider로 감싸줘야한다. 그리고 value로 감싸줘야한다.
+    <TableContext.Provider value={value}>
+      <Form />
+      <div>{timer}</div>
+      <Table />
+      <div>{result}</div>
+    </TableContext.Provider>
+);
+}
+
+export default MineSearch;
+```
+> dispatch 이런 함수를 한방에 내려보내기 위해서 ***React.ContextAPI**를 사용하겠다. <br>
+> 나중에 interface는 재사용 할 수도 있기떄문에, `types파일`을 만들어 따로 관리하는게 좋다. <br>
+
+
+#### MineSearch.tsx(게임구현)
+```js
+
+...생략
+...생략
+
+const MineSearch = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { tableData, halted, timer, result } = state;
+
+  const value = useMemo(() => ({ tableData, halted, dispatch }), [tableData, halted]);
+
+  useEffect(() => {
+    let timer: number;
+    if (halted === false) {
+      timer = window.setInterval(() => {
+        dispatch({ type: INCREMENT_TIMER });
+      }, 1000);
+    }
+    return () => {
+      clearInterval(timer);
+    }
+  }, [halted]);
+
+  return (
+    <TableContext.Provider value={value}>
+      <Form />
+      <div>{timer}</div>
+      <Table />
+      <div>{result}</div>
+    </TableContext.Provider>
+);
+}
+
+export default MineSearch;
 ```
 
 
