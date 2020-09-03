@@ -1,5 +1,10 @@
 import * as React from 'react';
 import { useEffect, useReducer, useMemo, Dispatch, createContext } from 'react';
+import Form from './Form';
+import {
+  ReducerActions, START_GAME, OPEN_CELL, INCREMENT_TIMER, NORMALIZE_CELL,
+  QUESTION_CELL, FLAG_CELL, CLICK_MINE,
+} from './action';
 
 export const CODE = {
   MINE: -7,
@@ -12,9 +17,9 @@ export const CODE = {
   OPENED: 0, // 0 이상이면 다 opened
 } as const;
 
-
+type Codes = (typeof CODE[keyof typeof CODE]);
 interface ReducerState {
-  tableData: number[][],
+  tableData: Codes[][],
   data: {
     row: number,
     cell: number,
@@ -27,7 +32,7 @@ interface ReducerState {
 }
 
 interface Context {
-  tableData: number[][],
+  tableData: Codes[][],
   halted: boolean,
   dispatch: Dispatch<ReducerActions>,
 }
@@ -51,7 +56,7 @@ const initialState: ReducerState = {
   openedCount: 0,
 }
 
-const plantMine = (row: number, cell: number, mine: number) => {
+const plantMine = (row: number, cell: number, mine: number): Codes[][] => {
   console.log(row, cell, mine);
   const candidate = Array(row * cell).fill(undefined).map((arr, i) => {
     return i;
@@ -61,9 +66,9 @@ const plantMine = (row: number, cell: number, mine: number) => {
     const chosen = candidate.splice(Math.floor(Math.random() * candidate.length), 1)[0];
     shuffle.push(chosen);
   }
-  const data = [];
+  const data: Codes[][] = [];
   for (let i = 0; i < row; i++) {
-    const rowData: number[] = [];
+    const rowData: Codes[] = [];
     data.push(rowData);
     for (let j = 0; j < cell; j++) {
       rowData.push(CODE.NORMAL);
@@ -80,98 +85,6 @@ const plantMine = (row: number, cell: number, mine: number) => {
   return data;
 };
 
-export const START_GAME = 'START_GAME' as const;
-export const OPEN_CELL = 'OPEN_CELL' as const;
-export const CLICK_MINE = 'CLICK_MINE' as const;
-export const FLAG_CELL = 'FLAG_CELL' as const;
-export const QUESTION_CELL = 'QUESTION_CELL' as const;
-export const NORMALIZE_CELL = 'NORMALIZE_CELL' as const;
-export const INCREMENT_TIMER = 'INCREMENT_TIMER' as const;
-
-interface StartGameAction {
-  type: typeof START_GAME,
-  row: number,
-  cell: number,
-  mine: number,
-}
-
-export const startGame = (row: number, cell: number, mine: number): StartGameAction => {
-    return {
-        type: START_GAME, row, cell, mine,
-    };
-};
-
-interface OpenCellAction {
-  type: typeof OPEN_CELL,
-  row: number,
-  cell: number,
-}
-
-export const openCell = (row: number, cell: number): OpenCellAction => {
-    return {
-        type: OPEN_CELL, row, cell,
-    };
-};
-
-interface ClickMineAction {
-  type: typeof CLICK_MINE,
-  row: number,
-  cell: number,
-}
-
-export const clickMine = (row: number, cell: number): ClickMineAction => {
-    return {
-        type: CLICK_MINE, row, cell,
-    };
-};
-
-interface FlagMineAction {
-  type: typeof FLAG_CELL,
-  row: number,
-  cell: number,
-}
-
-export const flagMine = (row: number, cell: number): FlagMineAction => {
-    return {
-        type: FLAG_CELL, row, cell,
-    };
-};
-
-interface QuestionCellAction {
-  type: typeof QUESTION_CELL,
-  row: number,
-  cell: number,
-}
-
-export const questionCell = (row: number, cell: number): QuestionCellAction => {
-    return {
-        type: QUESTION_CELL, row, cell,
-    };
-};
-
-interface NormalizeCellAction {
-  type: typeof NORMALIZE_CELL,
-  row: number,
-  cell: number,
-}
-
-export const normalizeCell = (row: number, cell: number): NormalizeCellAction => {
-    return {
-        type: NORMALIZE_CELL, row, cell,
-    };
-};
-
-interface IncrementTimerAction {
-  type: typeof INCREMENT_TIMER,
-}
-
-export const incrementTimer = (): IncrementTimerAction => {
-    return {
-        type: INCREMENT_TIMER,
-    };
-};
-
-type ReducerActions = StartGameAction | OpenCellAction | ClickMineAction | FlagMineAction | QuestionCellAction | NormalizeCellAction | IncrementTimerAction;
 const reducer = (state = initialState, action: ReducerActions): ReducerState => {
   switch (action.type) {
     case START_GAME:
@@ -187,7 +100,81 @@ const reducer = (state = initialState, action: ReducerActions): ReducerState => 
         halted: false,
         timer: 0,
       };
-    case OPEN_CELL: // 나중에 적어주겠다.
+      case OPEN_CELL: {
+        const tableData = [...state.tableData];
+        tableData.forEach((row, i) => {
+          tableData[i] = [...row];
+        });
+        const checked: string[] = [];
+        let openedCount = 0;
+        const checkAround = (row: number, cell: number) => {
+        console.log(row, cell);
+        if (row < 0 || row >= tableData.length || cell < 0 || cell >= tableData[0].length) {
+          return;
+        } // 상하좌우 없는칸은 안 열기
+        if (([CODE.OPENED, CODE.FLAG, CODE.FLAG_MINE, CODE.QUESTION_MINE, CODE.QUESTION] as Codes[]).includes(tableData[row][cell])) {
+          return;
+        } // 닫힌 칸만 열기
+        if (checked.includes(row + '/' + cell)) {
+          return;
+        } else {
+          checked.push(row + '/' + cell);
+        } // 한 번 연칸은 무시하기
+        let around = [
+          tableData[row][cell - 1], tableData[row][cell + 1],
+        ];
+        if (tableData[row - 1]) {
+          around = around.concat([tableData[row - 1][cell - 1], tableData[row - 1][cell], tableData[row - 1][cell + 1]]);
+        }
+        if (tableData[row + 1]) {
+          around = around.concat([tableData[row + 1][cell - 1], tableData[row + 1][cell], tableData[row + 1][cell + 1]]);
+        }
+        const count = around.filter(function (v) {
+          return ([CODE.MINE, CODE.FLAG_MINE, CODE.QUESTION_MINE] as Codes[]).includes(v);
+        }).length as Codes;
+        if (count === 0) { // 주변칸 오픈
+          if (row > -1) {
+            const near = [];
+            if (row - 1 > -1) {
+              near.push([row - 1, cell - 1]);        
+              near.push([row - 1, cell]);        
+              near.push([row - 1, cell + 1]);        
+            }        
+            near.push([row, cell - 1]);        
+            near.push([row, cell + 1]);        
+            if (row + 1 < tableData.length) {        
+              near.push([row + 1, cell - 1]);        
+              near.push([row + 1, cell]);        
+              near.push([row + 1, cell + 1]);        
+            }      
+            near.forEach((n) => {        
+              if (tableData[n[0]][n[1]] !== CODE.OPENED) {        
+                checkAround(n[0], n[1]);        
+              }        
+            })        
+          }        
+        }        
+        if (tableData[row][cell] === CODE.NORMAL) { // 내 칸이 닫힌 칸이면 카운트 증가        
+          openedCount += 1;        
+        }        
+        tableData[row][cell] = count;
+      };           
+      checkAround(action.row, action.cell);     
+      let halted = false;     
+      let result = '';     
+      console.log(state.data.row * state.data.cell - state.data.mine, state.openedCount, openedCount);    
+      if (state.data.row * state.data.cell - state.data.mine === state.openedCount + openedCount) { // 승리    
+        halted = true;  
+        result = `${state.timer}초만에 승리하셨습니다`;    
+      }    
+      return {
+        ...state,
+        tableData,
+        openedCount: state.openedCount + openedCount,
+        halted,
+        result,
+      };
+    }
     case CLICK_MINE: {
       const tableData = [...state.tableData];
       tableData[action.row] = [...state.tableData[action.row]];
