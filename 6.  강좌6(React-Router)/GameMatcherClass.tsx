@@ -1,51 +1,3 @@
-# 강좌6
-
-  - [리액트 라우터 타이핑 준비하기](#리액트-라우터-타이핑-준비하기)
-  - [match와 location, history](#match와-location,-history)
-
-
-
-
-
-## 리액트 라우터 타이핑 준비하기
-[위로올라가기](#강좌6)
-
-#### Games.tsx
-```js
-import * as React from 'react';
-import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
-import GameMatcher from './GameMatcher';
-
-const Games: React.FunctionComponent = () => {
-  return (
-    <BrowserRouter>
-      <div>
-        <Link to="/game/number-baseball">숫자야구</Link>
-        &nbsp;
-        <Link to="/game/rock-scissors-paper">가위바위보</Link>
-        &nbsp;
-        <Link to="/game/lotto-generator">로또생성기</Link>
-        &nbsp;
-        <Link to="/game/index">게임 매쳐</Link>
-      </div>
-      <div>
-        <Switch>
-          <Route exact path="/" component={GameMatcher} />
-          <Route path="/game/:name" render={(props) => <GameMatcher {...props} />} />
-        </Switch>
-      </div>
-    </BrowserRouter>
-  );
-};
-
-export default Games;
-```
-
-## match와 location, history
-[위로올라가기](#강좌6)
-
-#### GameMatcherClass.tsx
-```js
 import * as React from 'react';
 import { Component } from 'react';
 import { withRouter } from 'react-router-dom';
@@ -82,5 +34,3 @@ class GameMatcher extends Component<RouteChildrenProps<{ name: string }>> {
 }
 
 export default GameMatcher;
-```
-
