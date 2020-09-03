@@ -32,3 +32,13 @@
   - React JSX 부분 타이핑 및 ReactNode ReactElement 설명
   - 질문 (2차원 배열, tslint, tsconfig)
 
+# 강좌5
+
+  - 지뢰찾기와 복습
+  - Context API 타이핑
+  - useContext 타이핑
+  - useContext 타이핑2
+  - 지뢰찾기 완성과 질문
+
+
+
