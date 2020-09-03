@@ -4,6 +4,7 @@
   - [Context API 타이핑](#Context-API-타이핑)
   - [useContext 타이핑](#useContext-타이핑)
   - [useContext 타이핑2](#useContext-타이핑2)
+  - [지뢰찾기 완성과 질문](#지뢰찾기-완성과-질문)
 
 
 
@@ -1017,4 +1018,10 @@ const RealTd: FC<RealTdProps> = memo(({ onClickTd, onRightClickTd, data }) => {
 export default memo(Td);
 ```
 > 게임설명은 생략하겠다. <br>
+
+
+## 지뢰찾기 완성과 질문
+[위로올라가기](#강좌5)
+
+> ***타입 일치시키는 게 어려우면 형 변환을 해주는 것도 괜찮은 편이다.*** <br>
 

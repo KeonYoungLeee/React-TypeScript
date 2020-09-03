@@ -4,6 +4,7 @@
   - [Context API 타이핑](#Context-API-타이핑)
   - [useContext 타이핑](#useContext-타이핑)
   - [useContext 타이핑2](#useContext-타이핑2)
+  - [지뢰찾기 완성과 질문](#지뢰찾기-완성과-질문)
 
 
 
@@ -1138,5 +1139,11 @@ const RealTd: FC<RealTdProps> = memo(({ onClickTd, onRightClickTd, data }) => {
 
 export default memo(Td);
 ```
+
+
+## 지뢰찾기 완성과 질문
+[위로올라가기](#강좌5)
+
+소스 코드 없음
 
 
