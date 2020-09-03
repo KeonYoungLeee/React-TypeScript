@@ -24,3 +24,11 @@
   - 로또 추첨기와 FC, useMemo
   - Class 라이프사이클 타이핑
 
+## 강좌4
+
+  - useReducer 타이핑
+  - Dispatch, children
+  - Reducer 타이핑
+  - React JSX 부분 타이핑 및 ReactNode ReactElement 설명
+  - 질문 (2차원 배열, tslint, tsconfig)
+
