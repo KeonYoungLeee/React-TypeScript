@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import NumberBaseball from '../2.  강좌2(숫자야구, 반응속도체크)/BaseBallGame/NumberBaseBall';
 import RSP from '../3.  강좌3(가위바위보, 로또추첨기)/RSP/RSP';
 import Lotto from '../3.  강좌3(가위바위보, 로또추첨기)/Lotto/Lotto';
 import { RouteChildrenProps } from 'react-router-dom';
 
-class GameMatcher extends Component<RouteChildrenProps<{ name: string }>> {
+class GameMatcher extends Component<RouteComponentProps<{ name: string }>> {
     render() {
         if (!this.props.match) {
             return (
@@ -33,4 +33,4 @@ class GameMatcher extends Component<RouteChildrenProps<{ name: string }>> {
     }
 }
 
-export default GameMatcher;
+export default withRouter(GameMatcher);

@@ -2,6 +2,7 @@
 
   - [리액트 라우터 타이핑 준비하기](#리액트-라우터-타이핑-준비하기)
   - [match와 location, history](#match와-location,-history)
+  - [withRouter](#withRouter)
 
 
 
@@ -127,5 +128,52 @@ export default Games;
 ```
 > querystring을 처리할 수 있는 부분이 `let urlSearchParams = new URLSearchParams(this.props.location.search.slice(1));`가 있다. <br>
 > querystring 부분을 보기 위해서는 `console.log(urlSearchParams.get('page'));`를 사용한다. <br>
+
+
+
+## withRouter
+[위로올라가기](#강좌6)
+
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom'; // RouteComponentProps 추가
+import NumberBaseball from '../2.  강좌2(숫자야구, 반응속도체크)/BaseBallGame/NumberBaseBall';
+import RSP from '../3.  강좌3(가위바위보, 로또추첨기)/RSP/RSP';
+import Lotto from '../3.  강좌3(가위바위보, 로또추첨기)/Lotto/Lotto';
+import { RouteChildrenProps } from 'react-router-dom';
+
+class GameMatcher extends Component<RouteComponentProps><{ name: string }>> { // RouteComponentProps를 대신 넣어준다.
+  render() {
+    if (!this.props.match) {
+      return (
+        <div>
+            일치하는 게임이 없습니다.
+        </div>
+      );
+    }
+    let urlSearchParams = new URLSearchParams(this.props.location.search.slice(1));
+    console.log(urlSearchParams.get('page'));
+    if (this.props.match.params.name === 'number-baseball') {
+      return <NumberBaseball />
+    } else if (this.props.match.params.name === 'rock-scissors-paper') {
+      return <RSP />
+    } else if (this.props.match.params.name === 'lotto-generator') {
+      return <Lotto />
+    } else {
+      return (
+        <div>
+          일치하는 게임이 없습니다.
+        </div>
+      );
+    }
+  }
+}
+
+export default withRouter(GameMatcher); // withRouter를 사용하면 RouteComponentProps도 추가해줘야한다.
+```
+
+> ***Router보다 바깥에 있는 컴포넌트들은 withRouter로 감싸 match, history, loaction를 props으로 넣어준다.*** <br>
+> 타입스크립트 설명이기떄문에 자세한 내용을 듣고싶으면 리액트 강좌를 들으면 된다. <br>
 
 
