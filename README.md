@@ -1,5 +1,5 @@
 # React-TypeScript
-제로초님의 타입+리액트 강좌
+제로초님의 타입스크립트+리액트 강좌
 
 ## 강좌1
 
@@ -39,6 +39,13 @@
   - useContext 타이핑
   - useContext 타이핑2
   - 지뢰찾기 완성과 질문
+
+# 강좌6
+
+  - 리액트 라우터 타이핑 준비하기
+  - match와 location, history
+  - withRouter
+  - react router hooks
 
 
 
