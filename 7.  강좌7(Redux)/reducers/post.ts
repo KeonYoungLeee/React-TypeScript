@@ -1,7 +1,11 @@
-const initialState = [];
+import { ADD_POST, AddPostAction } from '../actions/post'
 
-const postReducer = (prevState, action) => {
+const initialState: string[] = [];
+
+const postReducer = (prevState = initialState, action: AddPostAction): string[] => {
   switch (action.type) {
+    case ADD_POST:
+      return [...prevState, action.data]
     default :
       return prevState;
   }

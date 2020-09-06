@@ -1,6 +1,7 @@
 # 강좌7
 
   - [리덕스 구조 잡기](#리덕스-구조-잡기)
+  - [action, reducer 타이핑](#action,-reducer-타이핑)
 
 
 
@@ -250,6 +251,219 @@ export default connect(mapStateToProps, mapDispatchToProps)(App);
 > 리덕스 미들웨어는 만들어서 사용할 수 있지만, 주로 라이브러리를 설치하여 사용한다.  <br>
 >> 관련된 미들웨어 라이브러리에는 `redux-thunk, redux-saga, redux-observable, redux-promise-middleware`등이 있습니다. <br>
 >> 주로 많이 사용하는게 **redux-thunk, redux-saga** 이다. <br>
+
+
+
+## action, reducer 타이핑
+[위로올라가기](#강좌7)
+
+> 여기서부터 타이핑이 시작될 것이다. <br>
+> 참고로, 타이핑하는데 에러가 없으면 타입 안 붙여도 된다. <br>
+
+
+#### actions\post.ts (수정 전)
+```js
+export const ADD_POST = 'ADD_POST';
+
+export const addPost = (data) => {
+  return {
+    type: ADD_POST,
+    data,
+  }
+}
+```
+
+#### actions\post.ts (수정 후)
+```js
+export const ADD_POST = 'ADD_POST' as const; // 불변을 위해서 as const 를 적어주었다.
+
+// 여기에는 타입들을 선언해준다.
+export interface AddPostAction { // interface 재 사용할 수도 있으니까 export를 해줬다.
+  type: typeof ADD_POST,
+  data: string
+}
+
+export const addPost = (data: string): AddPostAction => {
+  return {
+    type: ADD_POST,
+    data,
+  }
+}
+```
+#### reducers\post.ts (수정 전)
+```js
+const initialState = [];
+
+const postReducer = (prevState, action) => {
+  switch (action.type) {
+    default :
+      return prevState;
+  }
+}
+
+export default postReducer;
+
+```
+
+#### reducers\post.ts (수정 후)
+```js
+import { ADD_POST, AddPostAction } from '../actions/post';
+
+const initialState: string[] = [];
+
+const postReducer = (prevState = initialState, action: AddPostAction): string[] => {
+  switch (action.type) {
+    case ADD_POST:
+      return [...prevState, action.data]
+    default :
+      return prevState;
+  }
+}
+
+export default postReducer;
+```
+
+
+
+#### actions\user.ts (수정 전)
+```js
+export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
+export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
+export const LOG_IN_FAILURE = 'LOG_IN_FAILURE';
+export const LOG_OUT = 'LOG_OUT';
+
+export const logIn = () => {
+  
+}
+
+export const logOut = () => {
+  return {
+    type: LOG_OUT,
+  }
+}
+```
+
+
+#### actions\user.ts (수정 후)
+```js
+export const LOG_IN_REQUEST = 'LOG_IN_REQUEST' as const;
+export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS' as const;
+export const LOG_IN_FAILURE = 'LOG_IN_FAILURE' as const;
+export const LOG_OUT = 'LOG_OUT';
+
+
+export interface LogInRequestAction { // 여기에는 타입들을 선언해준다.
+  type: typeof LOG_IN_REQUEST
+  data: { id: string, password: string},
+}
+export interface LogInSuccessAction { // 여기에는 타입들을 선언해준다.
+  type: typeof LOG_IN_SUCCESS,
+  data: { userId: string, nickname: string},
+}
+export interface LogInFailureAction { // 여기에는 타입들을 선언해준다.
+  type: typeof LOG_IN_FAILURE,
+  error: Error,
+}
+export const logIn = (data: { id: string, password: string}) => { // data 안에는 id와 비밀번호가 있다.
+  
+}
+
+
+export interface LogOutAction { // 여기에는 타입들을 선언해준다.
+  type: typeof LOG_OUT,
+}
+
+export const logOut = () => {
+  return {
+    type: LOG_OUT,
+  }
+}
+```
+> 실제 구현은 안했지만, 인터페이스를 미리 만들었다. <br>
+> export라서 다 가져가서 import로 사용하면 된다. (reducers에서 사용할 것이다.) <br>
+
+#### reducers\user.ts (수정 전)
+```js
+const initialState = {
+  isLoogingIn: false,
+  data: null,
+};
+
+const userReducer = (prevState, action) => {
+  switch (action.type) {
+    default:
+      return prevState;
+  }
+}
+
+export default userReducer;
+```
+
+
+#### reducers\user.ts (수정 후)
+```js
+import { 
+  LOG_IN_REQUEST, LOG_IN_SUCCESS, LOG_IN_FAILURE, LOG_OUT,
+  LogInRequestAction, LogInSuccessAction, LogInFailureAction, LogOutAction
+} from '../actions/user';
+
+export interface UserState {
+  isLoggingIn: boolean,
+  data: {
+    nickname: string,
+  } | null, // data가 null이 있으니까 null도 적어줘야한다.
+}
+
+const initialState: UserState = {
+  isLoggingIn: false,
+  data: null,
+};
+
+type UserReducerActions = LogInRequestAction | LogInSuccessAction | LogInFailureAction | LogOutAction;
+const userReducer = (prevState = initialState , action: UserReducerActions) => {
+  switch (action.type) {
+    case LOG_IN_REQUEST: // 이 부분은 나중에 타이핑 할 것이다.
+    case LOG_IN_SUCCESS: // 이 부분은 나중에 타이핑 할 것이다.
+    case LOG_IN_FAILURE: // 이 부분은 나중에 타이핑 할 것이다.
+    case LOG_OUT:
+      return {
+        ...prevState,
+        data: null,
+      };
+    default:
+      return prevState;
+  }
+}
+
+export default userReducer;
+```
+
+#### reducers\index.ts
+```js
+import { combineReducers } from 'redux';
+import userReducer from './user';
+import postReducer from './post';
+
+
+const reudcer = combineReducers({
+  user: userReducer,
+  posts: postReducer,
+})
+
+export default reudcer;
+
+//  확인 결과
+// const reudcer: Reducer<CombinedState<{
+//     user: UserState;
+//     posts: string[];
+// }>, LogInRequestAction | LogInSuccessAction | LogInFailureAction | LogOutAction | AddPostAction>
+
+// (alias) combineReducers<{
+//   user: (prevState: UserState | undefined, action: UserReducerActions) => UserState;
+//   posts: (prevState: string[] | undefined, action: AddPostAction) => string[];
+// }>(
+```
+> `reducers\index.ts`의 **reudcer**랑 **combineReducers**를 보면 타입추론이 되어진 것을 확인할 수 있다. <br>
 
 
 
