@@ -4,6 +4,7 @@
   - [action, reducer 타이핑](#action,-reducer-타이핑)
   - [리덕스 컴포넌트 타이핑](#리덕스-컴포넌트-타이핑)
   - [redux thunk 타이핑](#redux-thunk-타이핑)
+  - [ThunkDispatch와 immer](#ThunkDispatch와-immer)
 
 
 
@@ -786,7 +787,7 @@ export const logInFailure = (error: Error): LogInFailureAction => {  // 추가
 };
 
 // Thunk Dispatch의 타입만들기.
-interface ThunkDispatch { // 일단 interface로 선언해준다.
+export interface ThunkDispatch { // 일단 interface로 선언해준다.
   (thunkAction: ThunkAction): void, // thunk 액션인 경우, 또 다른 의미에서는 리턴 값이 없는 경우(void)
   <A>(action: A): A, // 임의의 액션인 경우, 또 다른 의미에서는 리턴 값이 있는 경우
   <TAction>(action: TAction | ThunkAction): TAction, // thunkAction 또는 A, 위의 것 2개의 `또는`관계이다.
@@ -824,5 +825,118 @@ export const logOut = () => {
 }
 ```
 > **실제로 thunk 타이핑은 조금 더 복잡하다.**
+
+
+## ThunkDispatch와 immer
+[위로올라가기](#강좌7)
+
+#### App.tsx (수정 전)
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import { logIn, logOut, ThunkDispatch } from './actions/user'; // ThunkDispatch를 추가해준다.
+// import { Dispatch } from 'redux'; // 삭제해준다.
+import { RootState } from './reducers';
+import { UserState } from './reducers/user';
+
+// 생략
+// 생략
+
+class App extends Component<StateProps & DisaptchProps> {
+  // 생략
+  // 생략
+}
+
+const mapStateToProps = (state: RootState) => ({
+  user: state.user,
+  posts: state.posts,
+})
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({ // 1) error
+  dispatchLogIn: (data: {id: string, password: string}) => dispatch(logIn(data)), // logIn이 ThunkActiom으로 되어있다.
+  
+  dispatchLogOut: () => dispatch(logOut()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+```
+
+> 1) error `dispatch: Dispatch` -> `dispatch: Dispatch<AnyAction>` -> `dispatch: ThunkDispatch` <br>
+> 여기에서는 AnyAction로 사용하는데 ThunkDispatch로 수정했기때문에 **`dispatch: ThunkDispatch`** 로 변경해준다. <br>
+
+`npm run dev`로 실행해준다.<br>
+지난 시간에 안했던 `reducers\user.ts`, `immer`를 설치하겠다. <br>
+
+#### reducers\user.ts (immer적용)
+```js
+import { produce } from 'immer'; // immer를 import해준다
+// 생략
+// 생략
+type UserReducerActions = LogInRequestAction | LogInSuccessAction | LogInFailureAction | LogOutAction;
+const userReducer = (prevState = initialState , action: UserReducerActions) => {
+  return produce(prevState, (draft) => { // produce를 들고온다.
+    switch (action.type) {
+      case LOG_IN_REQUEST:
+        draft.data = null;
+        draft.isLoggingIn = true;
+        break;
+      case LOG_IN_SUCCESS:
+        draft.data = action.data;
+        draft.isLoggingIn = false;
+        break;
+      case LOG_IN_FAILURE:
+        draft.data = null;
+        draft.isLoggingIn = false;
+        break;
+      case LOG_OUT:
+        draft.data = null;
+        break;
+      default:
+        break;
+    }
+  })
+}
+
+export default userReducer;
+```
+> **타이핑도 state를 그대로 가져와서 따로 할 필요가 없다.** 
+
+#### reducers\post.ts (immer 적용)
+```js
+import produce from 'immer'; 
+import { ADD_POST, AddPostAction } from '../actions/post'
+
+const initialState: string[] = [];
+
+const postReducer = (prevState = initialState, action: AddPostAction): string[] => {
+  return produce(prevState, (draft) => {
+    switch (action.type) {
+      case ADD_POST:
+        draft.push(action.data);
+        break;
+      default :
+        break;
+    }
+  })
+}
+
+export default postReducer;
+```
+
+#### ThunkDispatch에 대한 Tip
+```js
+export interface ThunkDispatch {
+  (thunkAction: ThunkAction): void,
+  <A>(action: A): A,
+  <TAction>(action: TAction | ThunkAction): TAction,
+}
+
+type ThunkAction = (dispatch: ThunkDispatch) => void;
+```
+> 이 부분에 대해서 너무 어렵다. 이해하기 힘들다 싶으면, `npm i redux-thunk`를 import를 해서 가져오면 된다. <br> 
+>> 하지만, 남의 타입에 너무 의존하지말고, 내가 스스로 만드는 것도 좋다. <br>
+
 
 

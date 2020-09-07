@@ -4,6 +4,7 @@
   - [action, reducer 타이핑](#action,-reducer-타이핑)
   - [리덕스 컴포넌트 타이핑](#리덕스-컴포넌트-타이핑)
   - [redux thunk 타이핑](#redux-thunk-타이핑)
+  - [ThunkDispatch와 immer](#ThunkDispatch와-immer)
 
 
 
@@ -483,6 +484,145 @@ const enhancer = process.env.NODE_ENV === 'production'
 const store = createStore(reducer, initialState, enhancer);
 
 export default store;
+```
+
+
+## ThunkDispatch와 immer
+[위로올라가기](#강좌7)
+
+#### reducers\post.ts
+```js
+import produce from 'immer'; 
+import { ADD_POST, AddPostAction } from '../actions/post'
+
+const initialState: string[] = [];
+
+const postReducer = (prevState = initialState, action: AddPostAction): string[] => {
+  return produce(prevState, (draft) => {
+    switch (action.type) {
+      case ADD_POST:
+        draft.push(action.data);
+        break;
+      default :
+        break;
+    }
+  })
+}
+
+export default postReducer;
+
+```
+
+
+#### reducers\user.ts
+```js
+import { produce } from 'immer';
+import { 
+  LOG_IN_REQUEST, LOG_IN_SUCCESS, LOG_IN_FAILURE, LOG_OUT,
+  LogInRequestAction, LogInSuccessAction, LogInFailureAction, LogOutAction
+} from '../actions/user';
+
+export interface UserState {
+  isLoggingIn: boolean,
+  data: {
+    nickname: string,
+  } | null,
+}
+
+const initialState: UserState = {
+  isLoggingIn: false,
+  data: null,
+};
+
+type UserReducerActions = LogInRequestAction | LogInSuccessAction | LogInFailureAction | LogOutAction;
+const userReducer = (prevState = initialState , action: UserReducerActions) => {
+  return produce(prevState, (draft) => {
+    switch (action.type) {
+      case LOG_IN_REQUEST:
+        draft.data = null;
+        draft.isLoggingIn = true;
+        break;
+      case LOG_IN_SUCCESS:
+        draft.data = action.data;
+        draft.isLoggingIn = false;
+        break;
+      case LOG_IN_FAILURE:
+        draft.data = null;
+        draft.isLoggingIn = false;
+        break;
+      case LOG_OUT:
+        draft.data = null;
+        break;
+      default:
+        break;
+    }
+  })
+}
+
+export default userReducer;
+```
+
+
+#### App.tsx
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import { logIn, logOut, ThunkDispatch } from './actions/user';
+import { Dispatch } from 'redux';
+import { RootState } from './reducers';
+import { UserState } from './reducers/user';
+
+interface StateProps {
+  user: UserState,
+}
+interface DisaptchProps {
+  dispatchLogIn: ({ id, password }: { id: string, password: string}) => void,
+  dispatchLogOut: () => void,
+}
+
+class App extends Component<StateProps & DisaptchProps> {
+
+  onClick = () => {
+    this.props.dispatchLogIn({
+      id: 'LeeKY',
+      password: 'password',
+    });
+  }
+
+  onLogout = () => {
+    this.props.dispatchLogOut();
+  }
+
+  render() {
+    const { user } = this.props;
+    return (
+      <div>
+        {user.isLoggingIn
+          ? <div>로그인 중</div>
+            : user.data
+              ? <div>{user.data.nickname}</div>
+              : '로그인 해주세요.'}
+        {!user.data
+          ? <button onClick={this.onClick}>로그인</button>
+          : <button onClick={this.onLogout}>로그아웃</button>}
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state: RootState) => ({
+  user: state.user,
+  posts: state.posts,
+})
+
+const mapDispatchToProps = (dispatch: ThunkDispatch) => ({
+  dispatchLogIn: (data: {id: string, password: string}) => dispatch(logIn(data)),
+  dispatchLogOut: () => dispatch(logOut()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
 ```
 
 
