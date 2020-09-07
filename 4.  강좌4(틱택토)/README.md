@@ -537,12 +537,12 @@ extendsion, 각각 프로젝트에 떄라서 다르다. <br>
   "exclude": [
     "node_modules"
   ],
-  "awesomTypescriptLoaderOptions": {
-    "useWebpackText": true,
-    "useTranspilModule": true,
-    "dotypeCheck": true,
-    "forkChecker": true,
-  }
+  // "awesomTypescriptLoaderOptions": {
+  //  "useWebpackText": true,
+  //  "useTranspilModule": true,
+  //  "dotypeCheck": true,
+  //  "forkChecker": true,
+  // }
 }
 ```
 
