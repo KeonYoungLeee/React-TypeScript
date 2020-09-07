@@ -503,6 +503,65 @@ interface ReducerState {
 extendsion, 각각 프로젝트에 떄라서 다르다. <br>
 예전에 사용했던 tsconfig.json을 사용하는 경우가 많다. <br>
 
-9분10초에 참고하기. <br>
+예시)
+```json
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "ES5",
+    "lib": [
+      "ES2015",
+      "ES2016",
+      "ES2017",
+      "ES2018",
+      "DOM"
+    ],
+    "jsx": "react",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    // "noImplicitAny": true,
+    // "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "downlevelIteration": true,
+    "sourceMap": true,
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ]
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "awesomTypescriptLoaderOptions": {
+    "useWebpackText": true,
+    "useTranspilModule": true,
+    "dotypeCheck": true,
+    "forkChecker": true,
+  }
+}
+```
 
-
+#### package.json
+> scripts의 예시들도 있다. <br>
+```json
+  "engines": {
+    "node": "^12",
+    "npm": "^6"
+  },
+  "scripts": {
+    "postinstall": "npm run build",
+    "build": "npm run clean && cross-env npm run build:prod",
+    "build:dev": "cross-env npm run build:dev",
+    "clean": "rimraf public compiled",
+    "start": "cross-env npm run start",
+    "dev": "cross-env npm run dev",
+    "dev:prod": "cross-env npm run dev:prod",
+    "lint": "eslint app server",
+    "test": "jset"
+  },
+```
