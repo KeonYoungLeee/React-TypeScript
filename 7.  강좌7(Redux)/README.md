@@ -2,6 +2,7 @@
 
   - [리덕스 구조 잡기](#리덕스-구조-잡기)
   - [action, reducer 타이핑](#action,-reducer-타이핑)
+  - [리덕스 컴포넌트 타이핑](#리덕스-컴포넌트-타이핑)
 
 
 
@@ -465,5 +466,156 @@ export default reudcer;
 ```
 > `reducers\index.ts`의 **reudcer**랑 **combineReducers**를 보면 타입추론이 되어진 것을 확인할 수 있다. <br>
 
+
+
+## 리덕스 컴포넌트 타이핑
+[위로올라가기](#강좌7)
+
+#### App.tsx (수정 전)
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import { logIn, logOut } from './actions/user';
+
+class App extends Component {
+
+  onClick = () => {
+    this.props.dispatchLogIn({
+      id: 'LeeKY',
+      password: 'password',
+    });
+  }
+
+  onLogout = () => {
+    this.props.dispatchLogOut();
+  }
+
+  render() {
+    const { user } = this.props;
+    return (
+      <div>
+        {user.isLoggingIn
+          ? <div>로그인 중</div>
+            : user.data
+              ? <div>{user.data.nickname}</div>
+              : '로그인 해주세요.'}
+        {!user.data
+          ? <button onClick={this.onClick}>로그인</button>
+          : <button onClick={this.onLogout}>로그아웃</button>}
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state) => ({
+  user: state.user,
+  posts: state.posts,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatchLogIn: (data: {id, password}) => dispatch(logIn(data)),
+  dispatchLogOut: () => dispatch(logOut()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+```
+
+
+#### App.tsx (수정 후)
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import { logIn, logOut } from './actions/user';
+import { Dispatch } from 'redux'; // redux의 Dispatch를 가져와야한다.
+import { RootState } from './reducers'; // 추가
+import { UserState } from './reducers/user'; // 추가
+
+interface StateProps { // state의 타입
+  user: UserState,
+}
+interface DisaptchProps {  // dispatch의 타입
+  dispatchLogIn: ({ id, password }: { id: string, password: string}) => void,
+  dispatchLogOut: () => void,
+}
+
+class App extends Component<StateProps & DisaptchProps> { // 타입설정
+
+  onClick = () => {
+    this.props.dispatchLogIn({
+      id: 'LeeKY',
+      password: 'password',
+    });
+  }
+
+  onLogout = () => {
+    this.props.dispatchLogOut();
+  }
+
+  render() {
+    const { user } = this.props;
+    return (
+      <div>
+        {user.isLoggingIn
+          ? <div>로그인 중</div>
+            : user.data
+              ? <div>{user.data.nickname}</div>
+              : '로그인 해주세요.'}
+        {!user.data
+          ? <button onClick={this.onClick}>로그인</button>
+          : <button onClick={this.onLogout}>로그아웃</button>}
+      </div>
+    )
+  }
+}
+
+// 밑에 코드를 참조할 것..
+const mapStateToProps = (state: RootState) => ({ // reducers의 폴더의 reducer를 불러와야한다.
+  user: state.user,
+  posts: state.posts,
+})
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({ // redux의 Dispatch이다.
+  dispatchLogIn: (data: {id: string, password: string}) => dispatch(logIn(data)), // 아직 에러로 표시되는데, 나중에 코드 타이핑을 할 것이이다.
+  dispatchLogOut: () => dispatch(logOut()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+```
+
+#### reducers\index.ts (수정 후)
+```js
+import { combineReducers } from 'redux';
+import userReducer from './user';
+import postReducer from './post';
+
+
+const reducer = combineReducers({
+  user: userReducer,
+  posts: postReducer,
+});
+
+// export type RootState2 = typeof reducer;
+// type RootState2 = (state: CombinedState<{
+//   user: UserState;
+//   posts: string[];
+// }> | undefined, action: LogInRequestAction | LogInSuccessAction | LogInFailureAction | LogOutAction | AddPostAction) => CombinedState<...>
+
+export type RootState = ReturnType<typeof reducer>;
+// type RootState = {
+//   readonly [$CombinedState]?: undefined;
+// } & {
+//   user: UserState;
+//   posts: string[];
+// }
+// 여기에서 & 이전에는 상관없고, & 이후에 타입 정의가 되어진 것을 확인할 수 있다.
+
+export default reducer;
+```
+> ***ReturnType***은 타입스크립트 유틸리티이다. 함수의 리턴을 가져온다. <br>
+> 타입하는게 어려우면 위에 경우처럼 하나씩 접근하는게 좋다. <br>
 
 

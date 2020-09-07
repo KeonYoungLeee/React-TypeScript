@@ -3,9 +3,10 @@ import userReducer from './user';
 import postReducer from './post';
 
 
-const reudcer = combineReducers({
+const reducer = combineReducers({
   user: userReducer,
   posts: postReducer,
-})
+});
+export type RootState = ReturnType<typeof reducer>;
 
-export default reudcer;
+export default reducer;

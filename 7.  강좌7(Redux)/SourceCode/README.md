@@ -2,6 +2,7 @@
 
   - [리덕스 구조 잡기](#리덕스-구조-잡기)
   - [action, reducer 타이핑](#action,-reducer-타이핑)
+  - [리덕스 컴포넌트 타이핑](#리덕스-컴포넌트-타이핑)
 
 
 
@@ -274,6 +275,87 @@ const userReducer = (prevState = initialState , action: UserReducerActions) => {
 }
 
 export default userReducer;
+```
+
+
+## 리덕스 컴포넌트 타이핑
+[위로올라가기](#강좌7)
+
+#### D:\_Study\InflearnVideoLecture\React-TypeScript\7.  강좌7(Redux)\reducers\index.ts
+```js
+import { combineReducers } from 'redux';
+import userReducer from './user';
+import postReducer from './post';
+
+
+const reducer = combineReducers({
+  user: userReducer,
+  posts: postReducer,
+});
+export type RootState = ReturnType<typeof reducer>;
+
+export default reducer;
+```
+
+#### D:\_Study\InflearnVideoLecture\React-TypeScript\7.  강좌7(Redux)\reducers\index.ts
+```js
+import * as React from 'react';
+import { Component } from 'react';
+import { connect } from 'react-redux';
+import { logIn, logOut } from './actions/user';
+import { Dispatch } from 'redux';
+import { RootState } from './reducers';
+import { UserState } from './reducers/user';
+
+interface StateProps {
+  user: UserState,
+}
+interface DisaptchProps {
+  dispatchLogIn: ({ id, password }: { id: string, password: string}) => void,
+  dispatchLogOut: () => void,
+}
+
+class App extends Component<StateProps & DisaptchProps> {
+
+  onClick = () => {
+    this.props.dispatchLogIn({
+      id: 'LeeKY',
+      password: 'password',
+    });
+  }
+
+  onLogout = () => {
+    this.props.dispatchLogOut();
+  }
+
+  render() {
+    const { user } = this.props;
+    return (
+      <div>
+        {user.isLoggingIn
+          ? <div>로그인 중</div>
+            : user.data
+              ? <div>{user.data.nickname}</div>
+              : '로그인 해주세요.'}
+        {!user.data
+          ? <button onClick={this.onClick}>로그인</button>
+          : <button onClick={this.onLogout}>로그아웃</button>}
+      </div>
+    )
+  }
+}
+
+const mapStateToProps = (state: RootState) => ({
+  user: state.user,
+  posts: state.posts,
+})
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  dispatchLogIn: (data: {id: string, password: string}) => dispatch(logIn(data)),
+  dispatchLogOut: () => dispatch(logOut()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
 ```
 
 
