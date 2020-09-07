@@ -47,4 +47,15 @@
   - withRouter
   - react router hooks
 
+# 강좌7
+
+  - 리덕스 구조 잡기
+  - action, reducer 타이핑
+  - 리덕스 컴포넌트 타이핑
+  - redux thunk 타이핑
+  - ThunkDispatch와 immer
+  - redux hooks 타이핑
+
+
+
 
