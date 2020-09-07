@@ -3,6 +3,7 @@
   - [리덕스 구조 잡기](#리덕스-구조-잡기)
   - [action, reducer 타이핑](#action,-reducer-타이핑)
   - [리덕스 컴포넌트 타이핑](#리덕스-컴포넌트-타이핑)
+  - [redux thunk 타이핑](#redux-thunk-타이핑)
 
 
 
@@ -281,7 +282,7 @@ export default userReducer;
 ## 리덕스 컴포넌트 타이핑
 [위로올라가기](#강좌7)
 
-#### D:\_Study\InflearnVideoLecture\React-TypeScript\7.  강좌7(Redux)\reducers\index.ts
+#### reducers\index.ts
 ```js
 import { combineReducers } from 'redux';
 import userReducer from './user';
@@ -297,7 +298,7 @@ export type RootState = ReturnType<typeof reducer>;
 export default reducer;
 ```
 
-#### D:\_Study\InflearnVideoLecture\React-TypeScript\7.  강좌7(Redux)\reducers\index.ts
+#### reducers\index.ts
 ```js
 import * as React from 'react';
 import { Component } from 'react';
@@ -356,6 +357,132 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+
+## redux thunk 타이핑
+[위로올라가기](#강좌7)
+
+#### actions\user.ts
+```js
+import { addPost } from "./post";
+
+export const LOG_IN_REQUEST = 'LOG_IN_REQUEST' as const;
+export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS' as const;
+export const LOG_IN_FAILURE = 'LOG_IN_FAILURE' as const;
+export const LOG_OUT = 'LOG_OUT';
+
+export interface LogInRequestAction {
+  type: typeof LOG_IN_REQUEST,
+  data: {
+    id: string,
+    password: string,
+  }
+}
+export const logInRequest = (data: { id: string, password: string }): LogInRequestAction => {
+  return {
+    type: LOG_IN_REQUEST,
+    data,
+  }
+};
+
+export interface LogInSuccessAction {
+  type: typeof LOG_IN_SUCCESS,
+  data: {
+    userId: string,
+    nickname: string,
+  },
+}
+export const logInSuccess = (data: { nickname: string, userId: string }): LogInSuccessAction => {
+  return {
+    type: LOG_IN_SUCCESS,
+    data,
+  }
+};
+
+export interface LogInFailureAction {
+  type: typeof LOG_IN_FAILURE,
+  error: Error,
+}
+export const logInFailure = (error: Error): LogInFailureAction => {
+  return {
+    type: LOG_IN_FAILURE,
+    error,
+  }
+};
+
+interface ThunkDispatch {
+  (thunkAction: ThunkAction): void,
+  <A>(action: A): A,
+  <TAction>(action: TAction | ThunkAction): TAction,
+}
+
+type ThunkAction = (dispatch: ThunkDispatch) => void;
+export const logIn = (data: { id: string, password: string}): ThunkAction => { 
+  return (dispatch) => {
+    dispatch(logInRequest(data));
+    try {
+      setTimeout(() => {
+        dispatch(logInSuccess({
+            userId: '1',
+            nickname: 'LEEKY'
+        }));
+        dispatch(addPost(''));
+      }, 1000);
+    } catch (error) {
+      dispatch(logInFailure(error));
+    }
+  }
+};
+
+export interface LogOutAction {
+  type: typeof LOG_OUT,
+
+}
+
+export const logOut = () => {
+  return {
+    type: LOG_OUT,
+  }
+}
+```
+
+
+#### store.ts
+```js
+import { createStore, MiddlewareAPI, Dispatch, AnyAction, compose, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import reducer from './reducers';
+
+const initialState = {
+  user: {
+    isLoggingIn: false,
+    data: null,
+  },
+  posts: [],
+}
+
+const firstMiddleware = (stroe: MiddlewareAPI) => (next: Dispatch<AnyAction>) => (action: AnyAction) => {
+  console.log('로깅', action);
+  next(action);
+}
+
+const thunkMiddleware = (store: MiddlewareAPI) => (next: Dispatch<AnyAction>) => (action: any) => {
+  if ( typeof action == "function") {
+    return action(store.dispatch, store.getState); 
+  };
+  return next(action);
+}
+
+const enhancer = process.env.NODE_ENV === 'production'
+  ? compose(applyMiddleware(firstMiddleware))
+  : composeWithDevTools(
+    applyMiddleware(firstMiddleware, thunkMiddleware)
+  )
+
+const store = createStore(reducer, initialState, enhancer);
+
+export default store;
 ```
 
 
